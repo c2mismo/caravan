@@ -20,6 +20,12 @@
 !.git
 !.gitignore
 
+# OTHERS
+*.lnk
+Thumbs.db
+*encryptable
+tmp
+
 
 # vscode & platformIO
 .vscode
