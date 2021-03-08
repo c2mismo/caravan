@@ -1,0 +1,52 @@
+
+
+  /////////////////////
+ // 230box to 12box //
+/////////////////////
+
+checkComm
+stateAutomatic
+stateReleRightIn
+stateReleRightOut
+stateReleLefttIn
+stateReleRightOut
+stateReleCHR
+stateReleHome
+
+
+checkComm
+locker (Demand for signalHome)
+requestInverter
+voltage (from external source right)
+voltage (from external source left)
+voltage (from internal box)
+voltage (from internal source home)
+anmeter
+
+
+  /////////////////////
+ // 12box to 230box //
+/////////////////////
+
+checkComm
+stateInverter
+testSignalIn
+testSignalRight
+testSignalLeft
+testSignalHome
+
+
+  /////////////////////
+ //    NOTEs        //
+/////////////////////
+
+checkComm
+Si no se reciben datos por cualquier causa, no rrecibimos una señal de ERROR,
+por lo tanto el valor de las variables no será cambiada, hasta recibir un nuevo
+mensaje correcto.
+Esto puede tener consecuencias no deseadas, para ello enviamos un valor siempre
+diferente del anterior, comprobamos si el valor a cambiado y si es así actualizamos
+el valor de la variable, en cambio si no a cambiado de valor devolveremos todos sus
+valores a unos valores preestablecidos para evitar conflictos.
+
+

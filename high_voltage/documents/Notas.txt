@@ -1,0 +1,11 @@
+
+main:
+El baudio rate lo configuramos a 115200
+porque así se dibujaba bien la onda con
+serial plotter.
+
+Voltimeter:
+Se probó usar una media movil exponencial
+como a la señal pero con un valor de 0.1
+y desvirtuaba mucho, figarse en maxVal y minVal.
+
