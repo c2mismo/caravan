@@ -41,13 +41,14 @@ bool tsetSignal230Left;
 
 //             PINS
 
-const int pinTestSignal230In = 8;
-const int pinTestSignal230Home = 9;
-const int pinTestSignal230Left = 10; // Simul 230 Volt for test
-const int pinTestSignal230Right = 11;
+const byte pinTestSignal230In = 8;
+const byte pinTestSignal230Home = 9;
+const byte pinTestSignal230Left = 10; // Simul 230 Volt for test
+const byte pinTestSignal230Right = 11;
 
-const int ledVerde = 2;
-const int reles16_1 = A0;
+const byte ledVerde = 13;
+
+
 
 //            END PINS
 
@@ -73,7 +74,6 @@ void setup(){
   pinMode(pinTestSignal230Right, INPUT_PULLUP);
 
   pinMode(ledVerde, OUTPUT);
-  pinMode(reles16_1, OUTPUT);
 }
 
 void loop(){
