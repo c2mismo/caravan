@@ -1,0 +1,80 @@
+
+
+
+
+17816
+
+Matiz: 131
+Sat: 178
+Lum: 130
+
+Rojo: 51
+Verde: 177
+Azul: 225
+
+************
+19158
+
+Matiz: 153
+Sat: 103
+Lum: 119
+
+Rojo: 72
+Verde: 91
+Azul: 181
+
+************
+17456
+
+Matiz: 118
+Sat: 76
+Lum: 95
+
+Rojo: 69
+Verde: 133
+Azul: 130
+
+************
+33808
+
+Matiz: 160
+Sat: 0
+Lum: 120
+
+Rojo: 128
+Verde: 128
+Azul: 128
+
+************
+15660
+
+Matiz: 96
+Sat: 111
+Lum: 105
+
+Rojo: 60
+Verde: 164
+Azul: 101
+
+************
+43268
+
+Matiz: 239
+Sat: 161
+Lum: 97
+
+Rojo: 172
+Verde: 34
+Azul: 37
+
+************
+
+colores base 	HVS		como 	RGB565 (Decimal)
+Rojo 		0-H 255-V 255-S		63488
+Amarillo 	42-H 255-V 255-S	65504
+Verde 	 	84-H 255-V 255-S	2016
+Turquesa 	126-H 255-V 255-S	2046
+Azul 	 	169-H 255-V 255-S	63
+Fucsia 	 	212-H 255-V 255-S	63519
+
+
