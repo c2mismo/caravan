@@ -1,0 +1,21 @@
+
+Queria mostrar la zona seleccionada.
+
+Problemas encontrados:
+
+Intenté lo mas sencillo colocar cuadro por led
+con opción crop image y mostrando img marco selección
+otra ventaga del método és poder seleccionar
+direcctamente pulsando sobre el led.
+
+El problema sobrepasamos límite de objetos por página.
+
+Probé con barra de desplazamiento,
+problema si se seleccina led en el centro de la barra
+hay que buscar metodo para truncar el lado izquierdo.
+
+Por falta de tiempo y no viendo necesario, para futuro...
+
+
+
+
