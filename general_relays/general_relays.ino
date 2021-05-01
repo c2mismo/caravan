@@ -11,28 +11,30 @@
 Servo escSalon;
 const byte escSalonPin = 6;
 byte fanPin;
-int fanValue;
+byte fanName;
+byte fanSalonValueRaw;
+int fanSalonValue;
 const byte fanSalonPin = 46;
+const byte fanSalonName = 0;    //  0=Salon
 const int fanSalonActiv = 1510;
 const int fanSalonStarter = 1575;
 const int fanSalonStarterDelay = 1000;
 const int fanSalonMin = 1559;
 const int fanSalonMax = 1615;
-byte fanSalonState;        // Save data for synq
-byte fanSalonValueRaw;
+byte fanSalonMode;        // Save data for synq
 
-#define ledSalon Serial2
-byte ledPin;
-const byte ledSalonPin = 39;  //////////////// Cambiar por 2 ////////
+byte ledPin; 
+const byte ledSalonPin = 22;
 
 
-#define Nextion Serial3
+#define rs485Serial Serial3
+byte nextionPing;
 
-// Send reset count for tmSYNQtimeOut (vaSYNQtimeOut)
-// this count val 250 in 8 times
-const int NextionSYNQ_TIME = 500;
-unsigned long NextionSYNQtime;
+char page;
+byte pinVcc;
+byte nameObject;
 
+//  Limitar a Relés en uso
 const byte relesPin  [32] {  5,   4,   3,   2,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49};
 //                        {101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216};
 uint8_t relePin;
@@ -44,9 +46,7 @@ char option = ' ';
 
 void setup() {
   Serial.begin(9600);
-  Serial.setTimeout(100);
-  Nextion.begin(115200);
-  ledSalon.begin(9600);
+  rs485Serial.begin(57600);
   escSalon.attach(escSalonPin);     // Init ESC
 
 
@@ -63,98 +63,16 @@ void setup() {
   {
     digitalWrite(relesPin[i], HIGH);
   }
-  NextionSYNQtime=millis();
   Serial.println("TEST INIT");
   delay(20);
-  NextionSYNQ('M');   // Sinq pageMain
-  // NextionSYNQ('L');   // Pulsar botn synq
 }
 
 void loop() {
-// Send a ping signal
-  if((millis()-NextionSYNQtime) > NextionSYNQ_TIME)
-  {
-    NextionPing();
-    NextionSYNQtime=millis();
-  }
-  NextionSerialRead();
+  rs485SerialRead();
 
-
-/*
-  dataLedSalon ++;
-  int checkLedSalon=1;
-
-  ledSalon.print("#");
-  ledSalon.write(checkLedSalon);
-  ledSalon.print("L");
-  Serial.print("#" + String(checkLedSalon) + "L");
-  ledSalon.flush();
-  delay(1000);
-  */
 }
 
-void ledSalonSerialRead() {   // Pendiente rs485SerialRead
-  
-  if(ledSalon.available()>2)
-  {
-    char initData = ledSalon.read();
-// Check the start of the data string
-    if(initData=='#')
-    {
-      uint8_t checkData = ledSalon.read();
-      unsigned long tmr1 = millis();
-      bool minLength = true;
-      while(ledSalon.available()<checkData)
-      {
-        if((millis()-tmr1)>100)
-        {
-          minLength=false;
-          break;
-        }
-      }
-      delay(10);
-      char dir;
-      if(minLength==true && ledSalon.available()==checkData)  
-      {
-        
-        dir = Nextion.read();
-        if(dir == 'G')
-        {
-          char cmd = ledSalon.read();
-          char cmd2;
-          switch(cmd)
-          {
-// RELAYS            NO AÑADIR "DUPLICADO" de NextionSerialRead()
-          case 'R':
-            relePin = ledSalon.read();
-            digitalWrite(relePin, !digitalRead(relePin));  // Hacer cambio de estado
-            if(digitalRead(relePin))
-            {
-              Nextion.print("pageMain.tPin" + String(relePin) + ".picc=1"); FF();
-            }
-            if(!digitalRead(relePin))
-            {
-              Nextion.print("pageMain.tPin"); Nextion.print(relePin); Nextion.print(".picc=2"); FF();
-            }
-          break;
-/*/ NextionSYNQ
-          case 'Q':
-            cmd2 = ledSalon.read();  // cmd2=M: pageMain cmd2=L: Leds
-            NextionSYNQ(cmd2);
-          break;*/
-          }
-        }
-        dir = Nextion.read();
-        if(dir == 'N')
-        {
-          //
-        }
-      }
-    }
-  }
-}
-
-void NextionSerialRead() {
+void rs485SerialRead() {
 /*
  * <init>
  * Heade - Indicate start of transmission
@@ -195,7 +113,7 @@ void NextionSerialRead() {
  * <Pin Vdc>
  * prints pageCmdFan.vaPinVccFan.val,1
  * <name>
- * prints pageCmdFan.vaNameFan.val,1      1=mesita
+ * prints pageCmdFan.vaNameFan.val,1      0=Salon
  * <mode>
  * printh NN         NN = 00 OFF, 01 ON, 02 Value (know change state)
  * <value>
@@ -230,18 +148,18 @@ void NextionSerialRead() {
  * prints pageCmdLed.vaPinVccLed.val,1
  * 
  */
-  if(Nextion.available()>2)
+  if(rs485Serial.available()>2)
   {
-    char initData = Nextion.read();
+    char initData = rs485Serial.read();
 // Check the start of the data string
     if(initData=='#')
     {
-      uint8_t checkData = Nextion.read();
+      uint8_t checkData = rs485Serial.read();
 Serial.print("checkData = "); Serial.println(checkData);
       unsigned long tmr1 = millis();
       bool minLength = true;
   // Verify that the entire data string has been received
-      while(Nextion.available()<checkData)
+      while(rs485Serial.available()<checkData)
       {
         if((millis()-tmr1)>100)
         {
@@ -249,31 +167,38 @@ Serial.print("checkData = "); Serial.println(checkData);
           break;
         }
       }
-      delay(1);
 // Verify that the entire data string that has been received does not exceed the expected
-      if(minLength==true && Nextion.available()==checkData)  
+      if(minLength==true && rs485Serial.available()==checkData)  
       {
-        char dir = Nextion.read();
+        char dir = rs485Serial.read();
+  // DIR only this arduino
 Serial.print("dir = "); Serial.println(dir);
         if(dir == 'G')
         {
-          char cmd = Nextion.read();
+          char cmd = rs485Serial.read();
 Serial.print("cmd = "); Serial.println(cmd);
-          char cmd2;
+
           switch(cmd)
           {
   // RELAYS
             case 'R':
-              relePin = Nextion.read();
+              relePin = rs485Serial.read();
+              nameObject = rs485Serial.read();
               digitalWrite(relePin, !digitalRead(relePin));  // Hacer cambio de estado
-             /* if(digitalRead(relePin))
+              if(digitalRead(relePin))
               {
-                Nextion.print("pageMain.tPin" + String(relePin) + ".picc=1"); FF();
+                //delay(1);
+                FF(); rs485Serial.print("pageMain.tPin" + String(relePin) + ".picc=1"); FF();
               }
               if(!digitalRead(relePin))
               {
-                Nextion.print("pageMain.tPin"); Nextion.print(relePin); Nextion.print(".picc=2"); FF();
-              }*/
+                delay(1);
+                FF(); rs485Serial.print("pageMain.tPin" + String(relePin) + ".picc=2"); FF();
+              }
+              if(relePin==ledSalonPin)
+              {
+                sendStatReleLedSalon();
+              }
             break;
   // High voltage
             case 'H':
@@ -285,143 +210,173 @@ Serial.print("cmd = "); Serial.println(cmd);
             break;
   // Fan
             case 'F':
-              fanSalonState = Nextion.read();  // State = 00 OFF, 01 ON, 02 Value (now change state)
-              switch(fanSalonState)
+              fanPin = rs485Serial.read();  // Pin Vdc esc
+              fanName = rs485Serial.read();  // Name
+              fanSalonMode = rs485Serial.read();  // State = 00 OFF, 01 ON, 02 Value (now change state)
+Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
+              switch(fanSalonMode)
               {
-                case 0:
-                  fanPin = Nextion.read();  // Pin Vdc esc
+                case 0: // Fan OFF
                   if(fanPin==fanSalonPin)
                   {
-                    fanSalonValueRaw=1;
-                    digitalWrite(fanSalonPin, HIGH); // Low trigger  OFF
-                    /*
-                    Nextion.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
-                    Nextion.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
-                    Nextion.print("pageCmdFan.t2.txt=\"OFF\""); FF();
-                    Nextion.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-                    Nextion.print("pageCmdFan.n0.val=0"); FF();
-                    Nextion.print("pageCmdFan.t2.bco=17456"); FF();*/
+                    if(fanName==fanSalonName)
+                    {
+                      fanSalonValueRaw=1;
+                      digitalWrite(fanSalonPin, HIGH); // Low trigger  OFF
+                      /*
+                      rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
+                      rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
+                      rs485Serial.print("pageCmdFan.t2.txt=\"ON\""); FF();
+                      rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
+                      rs485Serial.print("pageCmdFan.n0.val=0"); FF();
+                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();*/
+                    }
                   }
                 break;
-                case 1:
+                case 1: // Fan ON
   Serial.println("ON");
-                  fanPin = Nextion.read();  // Pin Vdc esc
                   if(fanPin==fanSalonPin)
                   {
-                    fanSalonValueRaw=1;
-                    digitalWrite(fanSalonPin, LOW); // Low trigger   ON
-                    escSalon.writeMicroseconds(fanSalonActiv);  // Init esc
-                    delay(1);
-                    escSalon.writeMicroseconds(fanSalonStarter);
-                    delay(fanSalonStarterDelay);   // Para hacer un "delay por millis" todo lo siguiente
-                                                  // debe estar fuera de el proceso de lectura
-                    
-                    escSalon.writeMicroseconds(fanSalonMin);
-                    /*
-                    Nextion.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
-                    Nextion.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
-                    Nextion.print("pageCmdFan.t2.txt=\"ON\""); FF();
-                    Nextion.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-                    Nextion.print("pageCmdFan.n0.val=" + String(fanSalonValueRaw)); FF();
-                    Nextion.print("pageCmdFan.t2.bco=17456"); FF();*/
+                    if(fanName==fanSalonName)
+                    {
+                      fanSalonValueRaw=1;
+                      digitalWrite(fanSalonPin, LOW); // Low trigger   ON
+                      escSalon.writeMicroseconds(fanSalonActiv);  // Init esc
+                      delay(1);
+                      escSalon.writeMicroseconds(fanSalonStarter);
+                      delay(fanSalonStarterDelay);   // Para hacer un "delay por millis" todo lo siguiente
+                                                    // debe estar fuera de el proceso de lectura
+                      
+                      escSalon.writeMicroseconds(fanSalonMin);
+                      /*
+                      rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
+                      rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
+                      rs485Serial.print("pageCmdFan.t2.txt=\"OFF\""); FF();
+                      rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
+                      rs485Serial.print("pageCmdFan.n0.val=" + String(fanSalonValueRaw)); FF();
+                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();*/
+                    }
                   }
                 break;
-                case 2:
-                  fanPin = Nextion.read();  // Pin Vdc esc
+                case 2: // Fan VALUE
                   if(fanPin==fanSalonPin)
                   {
-                    fanSalonValueRaw = Nextion.read();  // Value RAW Signal esc
-                    fanValue = map(fanSalonValueRaw, 0, 100, fanSalonMin, fanSalonMax);  // Value Signal esc
-                    escSalon.writeMicroseconds(fanValue);
+                    if(fanName==fanSalonName)
+                    {
+                      fanSalonValueRaw = rs485Serial.read();  // Value RAW Signal esc
+                      fanSalonValue = map(fanSalonValueRaw, 0, 100, fanSalonMin, fanSalonMax);  // Value Signal esc
+                      escSalon.writeMicroseconds(fanSalonValue);
+                    }
+Serial.print("fanSalonValue = ");Serial.println(fanSalonValue);
                   }
                 break;
               }
             break;
-  // Leds             FUNDIR con ledSalonSerialRead() PARA rs485SerialRead()
-  //                   ONLY repetidor <DIR> S=Leds Salon   (cambiar al Nextion)
-            case 'L':
-              //
-            break;
   // NextionSYNQ
             case 'Q':
-              cmd2 = Nextion.read();  // cmd2=M: pageMain cmd2=L: Leds
-              NextionSYNQ(cmd2);
+              page = rs485Serial.read();  // page: N = pageMain F = Fans L = Leds
+              switch(page)
+              {
+                case 'M':
+  // synq PageMain
+                  NextionSYNQ(0);
+                break;
+                case 'F':
+  // synq Fan
+                  pinVcc = rs485Serial.read();
+                  switch(pinVcc)
+                  {
+                    case 46:
+                      nameObject = rs485Serial.read();  // Name
+                      switch(nameObject)
+                      {
+                        case 0:         //  Mesita
+                          NextionSYNQ(1);
+                        break;
+                      }
+                    break;
+                  }
+                break;
+                case 'L':
+  // synq Leds
+                  relePin = rs485Serial.read();
+Serial.print("relePin = "); Serial.println(String(relePin));
+                  nameObject = rs485Serial.read();
+Serial.print("nameObject = "); Serial.println(String(nameObject));
+                  digitalWrite(relePin, HIGH);  // OFF
+                    delay(1);
+                    FF(); rs485Serial.print("pageMain.tPin" + String(relePin) + ".picc=1"); FF();
+                  if(relePin==ledSalonPin)
+                  {
+                    sendStatReleLedSalon();
+                  }
+                break;
+              }
             break;
           }
-        }
-        if(dir == 'S') //  FUNDIR con ledSalonSerialRead() PARA rs485SerialRead()
-        {              //  Repeat signal
-          //
         }
       }
     }
   }
 }
 
-void NextionSYNQ(char page) {
+
+void sendStatReleLedSalon() {
+  delay(1);
+Serial.print("ledSalonPin = "); Serial.println(String(!digitalRead(ledSalonPin)));
+  byte bufSend[] = { '#', 6, 'S', 'Q', 'G', relePin, nameObject, !digitalRead(ledSalonPin) };
+  rs485Serial.write(bufSend, 8);
+}
+
+void NextionSYNQ(byte a) {
 // RELAY's
-  switch(page)
+  switch(a)
   {
-    case 'M':
+  // synq PageMain
+    case 0:
+Serial.print("NextionSYNQ = "); Serial.println(a);
       for (byte i=0;i<32;i++)
       {
         if(!digitalRead(relesPin[i]))  // (ON) Trigger Low Level
         {
-          Nextion.print("pageMain.tPin" + String(relesPin[i]) + ".picc=2"); FF();
+          rs485Serial.print("pageMain.tPin" + String(relesPin[i]) + ".picc=2"); FF();
         } else if(digitalRead(relesPin[i]))   // (OFF)
         {
-          Nextion.print("pageMain.tPin" + String(relesPin[i]) + ".picc=1"); FF();
+          rs485Serial.print("pageMain.tPin" + String(relesPin[i]) + ".picc=1"); FF();
         }
       }
-      if(fanSalonState==2)
-      { // Value
-        Nextion.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
-        Nextion.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
-        Nextion.print("pageCmdFan.t2.txt=\"ON\""); FF();
-        Nextion.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-        Nextion.print("pageCmdFan.t2.bco=17456"); FF();
-      }
-      if(fanSalonState==1)
-      { // ON
-        Nextion.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
-        Nextion.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
-        Nextion.print("pageCmdFan.t2.txt=\"ON\""); FF();
-        Nextion.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-        Nextion.print("pageCmdFan.t2.bco=17456"); FF();
-      }
-      if(fanSalonState==0)
-      { // OFF
-        Nextion.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
-        Nextion.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
-        Nextion.print("pageCmdFan.t2.txt=\"OFF\""); FF();
-        Nextion.print("pageCmdFan.h0.val=1"); FF();
-        Nextion.print("pageCmdFan.n0.val=0"); FF();
-        Nextion.print("pageCmdFan.t2.bco=17456"); FF();
-      }
-      NextionPing();
-      Nextion.print("pageBlack.vaSYNQstate.val=1"); FF();
-    break;
-    case 'L':
-      ledPin = Nextion.read(); 
-      if(ledPin==ledSalonPin)
+      if(!digitalRead(fanSalonPin))  // (ON) Trigger Low Level
       {
-        ledSalon.print("#");
-        ledSalon.write(0x02);
-        ledSalon.print("Q");
-        ledSalon.write(ledPin);
-        ledSalon.flush();
-        delay(1000);
+        rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
+      } else if(digitalRead(fanSalonPin))   // (OFF)
+      {
+        rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
       }
+      rs485Serial.print("pageBlack.vaSYNQ.val=" + String(nextionPing++)); FF();
+    break;
+  // synq Fan Salon
+    case 1:
+      if(fanSalonMode==1 || fanSalonMode==2) // ON
+      { // Value
+        rs485Serial.print("pageCmdFan.t2.txt=\"ON\""); FF();
+        rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
+        rs485Serial.print("pageCmdFan.n0.val=pageCmdFan.h0.val"); FF();
+        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
+      }
+      if(fanSalonMode==0) // OFF
+      { // OFF
+        rs485Serial.print("pageCmdFan.t2.txt=\"OFF\""); FF();
+        rs485Serial.print("pageCmdFan.h0.val=1"); FF();
+        rs485Serial.print("pageCmdFan.n0.val=0"); FF();
+        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
+      }
+      rs485Serial.print("pageBlack.vaSYNQ.val=" + String(nextionPing++)); FF();
     break;
   }
 }
 
-void NextionPing() {
-  Nextion.print("pageBlack.vaSYNQtimeOut.val=0"); FF();
-}
-
 void FF(){
-  Nextion.print("\xFF\xFF\xFF");
+  rs485Serial.print("\xFF\xFF\xFF");
 }
 
 /*
