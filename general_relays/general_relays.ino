@@ -23,12 +23,15 @@ const int fanSalonMin = 1559;
 const int fanSalonMax = 1615;
 byte fanSalonMode;        // Save data for synq
 
-byte ledPin; 
+#define rs485Serial Serial3
+byte nextionPing;
+
+byte ledPin;
 const byte ledSalonPin = 22;
 
 
-#define rs485Serial Serial3
-byte nextionPing;
+const byte inverterPin = 13;
+bool inverterStatus = 0;
 
 char page;
 byte pinVcc;
@@ -39,10 +42,6 @@ const byte relesPin  [32] {  5,   4,   3,   2,  22,  23,  24,  25,  26,  27,  28
 //                        {101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216};
 uint8_t relePin;
 
-
-
-//  TEMP
-char option = ' ';
 
 void setup() {
   Serial.begin(9600);
@@ -63,7 +62,6 @@ void setup() {
   {
     digitalWrite(relesPin[i], HIGH);
   }
-  Serial.println("TEST INIT");
   delay(20);
 }
 
@@ -168,7 +166,7 @@ Serial.print("checkData = "); Serial.println(checkData);
         }
       }
 // Verify that the entire data string that has been received does not exceed the expected
-      if(minLength==true && rs485Serial.available()==checkData)  
+      if(minLength==true && rs485Serial.available()==checkData)
       {
         char dir = rs485Serial.read();
   // DIR only this arduino
@@ -187,7 +185,7 @@ Serial.print("cmd = "); Serial.println(cmd);
               digitalWrite(relePin, !digitalRead(relePin));  // Hacer cambio de estado
               if(digitalRead(relePin))
               {
-                //delay(1);
+                delay(1);
                 FF(); rs485Serial.print("pageMain.tPin" + String(relePin) + ".picc=1"); FF();
               }
               if(!digitalRead(relePin))
@@ -202,6 +200,14 @@ Serial.print("cmd = "); Serial.println(cmd);
             break;
   // High voltage
             case 'H':
+              // if( XX >= 0 && XX <= 20) Values of ammeter protect.
+              // if( XX >= 180 && XX <= 250) Values of voltmeter protect.
+              // if( XX == 30 ) Supply voltage to HOME.
+              // if( XX == 40 ) Supply voltage to out RIGHT.
+              // if( XX == 50 ) Supply voltage to out LEFT.
+            break;
+  // High Tension
+            case 'T':
               // if( XX >= 0 && XX <= 20) Values of ammeter protect.
               // if( XX >= 180 && XX <= 250) Values of voltmeter protect.
               // if( XX == 30 ) Supply voltage to HOME.
@@ -304,8 +310,8 @@ Serial.print("relePin = "); Serial.println(String(relePin));
                   nameObject = rs485Serial.read();
 Serial.print("nameObject = "); Serial.println(String(nameObject));
                   digitalWrite(relePin, HIGH);  // OFF
-                    delay(1);
-                    FF(); rs485Serial.print("pageMain.tPin" + String(relePin) + ".picc=1"); FF();
+                  delay(1);
+                  FF(); rs485Serial.print("pageMain.tPin" + String(relePin) + ".picc=1"); FF();
                   if(relePin==ledSalonPin)
                   {
                     sendStatReleLedSalon();
@@ -352,7 +358,7 @@ Serial.print("NextionSYNQ = "); Serial.println(a);
       {
         rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
       }
-      rs485Serial.print("pageBlack.vaSYNQ.val=" + String(nextionPing++)); FF();
+      rs485Serial.print("click EndSynqReles,1"); FF();
     break;
   // synq Fan Salon
     case 1:
@@ -370,7 +376,7 @@ Serial.print("NextionSYNQ = "); Serial.println(a);
         rs485Serial.print("pageCmdFan.n0.val=0"); FF();
         rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
       }
-      rs485Serial.print("pageBlack.vaSYNQ.val=" + String(nextionPing++)); FF();
+      rs485Serial.print("click EndSynqReles,1"); FF();
     break;
   }
 }

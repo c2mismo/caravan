@@ -1,0 +1,10 @@
+
+Trás muchos test e intentos frustrados.
+
+La librería FastLED parece que por causa de las interrupciones
+que utiliza, perjudica la comunicación serial.
+
+
+
+
+

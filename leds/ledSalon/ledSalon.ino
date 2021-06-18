@@ -191,7 +191,7 @@ void rs485SerialRead() {
  * prints pageCmdLed.vaPinVccClara.val,1
  * 
  */
-    if(rs485Serial.available()>2)
+  if(rs485Serial.available()>2)
   {
     char initData = rs485Serial.read();
     if(initData=='#')
