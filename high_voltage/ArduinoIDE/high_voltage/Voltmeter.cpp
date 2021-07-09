@@ -54,6 +54,7 @@ float Voltmeter::getAverage()
 
 float Voltmeter::getVoltage()
 {
+  get();
 //  _R = (_Vmax - _Vmid)*10;
 //  _voltage = (float)_R/10;
 //  _voltage = (_Vmax - _Vmid);

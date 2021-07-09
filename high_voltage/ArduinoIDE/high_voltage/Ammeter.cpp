@@ -41,6 +41,7 @@ void Ammeter::get()
   _amper = (_valMaxClean-_average)*(1-0)/(_amperRef-_average)+0;
 
   // SlowAmmper
+  /*
   if (!_activ)
   {
     _countIntervalRead = 0;
@@ -57,9 +58,12 @@ void Ammeter::get()
       _countIntervalRead++;
     } else {
       _slowAmper = _amperIncrement/_countIntervalRead;
+Serial.println("---------------Ammeter.CPP----------------");
+Serial.print("_slowAmper = "); Serial.println(_slowAmper);
       _activ = false;
     }
   }
+  */
 }
 
 float Ammeter::getValue()
@@ -76,12 +80,14 @@ float Ammeter::getAverage()
 
 float Ammeter::getAmper()
 {
+  get();
   _amper = _amper;
   return _amper;
 }
 
 float Ammeter::getAmperSlow()
 {
+  get();
   _slowAmper = _slowAmper;
   return _slowAmper;
 }

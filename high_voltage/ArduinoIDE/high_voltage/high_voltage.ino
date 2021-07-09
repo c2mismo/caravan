@@ -1,5 +1,3 @@
-//#define _chgArduino_
-
 /*
  * Localizado mucho ruido en la lectura de los voltages
  * puede que el arduino esté defectuoso.
@@ -7,6 +5,13 @@
  * Por falta de tiempo se harán varias lecturas
  * y trabajaremos actualmente con la media de ellas
  * hasta localizar el foco del ruido.
+ * 
+ * No es posible trueRMS por tiempo excesido en calculos
+ * necesario modificar la placa del sensor,
+ * instalar un puente de diodo para hacer lectura
+ * de las hondas de 0V a 5V siendo 0V el paso por zero,
+ * simplificamos calculos y podremos hacer 300 lecturas
+ * cada dos hondas "una honda sinuidal".
  * 
  * State testing, developer c2mismo 2019.
  * License GNU, see at the end.
@@ -61,6 +66,10 @@ const int reles[7] = {releRightIn, releLeftIn, releRightOut, releLeftOut, releHo
 
 //           VARIABLES
 
+bool delayInit = true;
+unsigned int tmrDelayUninit;
+unsigned int tmrDelayInit = 125;
+
 bool signalOn;
 bool lastSignalOn;
 bool signalHome;
@@ -81,36 +90,45 @@ Voltmeter voltmeterRight (voltmeterRightPin, freq, samples);
 Voltmeter voltmeterLeft (voltmeterLeftPin, freq, samples);
 
 float voltMin = 190;
-float voltMax = 236;
+float voltMax = 240;
+int voltTmrCutOff = 0;    // millisecons for the revalue and cut off current
+                            // en hacer una lectura de verificación tarda 220 ms.
+bool voltProtect = false;
 bool overVolt = false;
-bool checkOverVolt = false;
-float overVoltValue;
-unsigned int tmrOverVoltProtect;
-unsigned int tmrOverVoltUnprotect = 5000;
-bool testVoltInOk = false;
-unsigned long tmrTestVoltInOk;
-unsigned long tmrMaxTestVoltInOk = 1000;    //  timer for init test voltageIn
+bool overVoltLast = overVolt;
+float overVoltValueCut;
+float overVoltValueMax;
+unsigned long voltTmrProtect;
+int voltTmrUnprotect = 8000;
+bool testVoltInOk_forInverter = false;
+unsigned long tmrTestVoltInOk_forInverter;
+int tmrMaxTestVoltInOk_forInverter = 1000;    //  timer for init test voltageIn
 
 byte stateHome;    // States 1 = Off, 2 = On, 4 Error
 byte stateCHR;
 byte stateRight;   // States 1 = Off, 2 = In, 3 = Out, 4 Error 
 byte stateLeft;
-float voltageHome; bool voltHomeOk;
-float voltageIn; bool voltInOk;
-float voltageRight; bool voltRightOk; bool lastVoltRightOk;
-float voltageLeft; bool voltLeftOk; bool lastVoltLeftOk;
+volatile float voltageHome; bool voltHomeOk; bool lastVoltHomeOk;
+volatile float voltageIn; bool voltInOk; bool lastVoltInOk;
+volatile float voltageRight; bool voltRightOk; bool lastVoltRightOk;
+volatile float voltageLeft; bool voltLeftOk; bool lastVoltLeftOk;
 
 float calibAmper = 18.95;  // inverso para subir resultado bajar valor
 int intervalRead = 250;
-float slowAmper;
+volatile float amperValue;
 float amperMax = 5;
+int amperTmrCutOff = 100;   // millisecons for the revalue and cut off current
 bool amperOk = false;
-bool amperProtect = true;
-unsigned int tmrAmperProtect;
-unsigned int tmrAmperUnprotect = 8000;
+bool amperProtect = false;    // Mantener false se activa con amperOk
+unsigned long tmrAmperProtect;
+int tmrAmperUnprotect = 8000;    // milliseconds for the unprotect ammeter
 Ammeter ammeter (ammeterPin, freq, calibAmper, intervalRead, amperMax);
 bool overAmper = false;
-float overAmperValue;
+bool overAmperLast = overAmper;
+float overAmperValueCut;
+float overAmperValueMax;
+
+byte lastCutOff = 0;   // 0 = anything, 1 = voltmeter protect and 2 = ammeter protect
 
 //         END VARIABLES
 
@@ -142,6 +160,7 @@ void setup(){
   pinMode(51, OUTPUT), digitalWrite(51, LOW);
   pinMode(52, OUTPUT), digitalWrite(52, LOW);
   //pinMode(53, OUTPUT), digitalWrite(53, LOW);
+
   // extra VCCs
   pinMode(2, OUTPUT), digitalWrite(2, HIGH);
   pinMode(A7, OUTPUT), digitalWrite(A7, HIGH);
@@ -149,31 +168,30 @@ void setup(){
   sendRequestReleInverter(0);
 
   getInitValues();
-
   tmrAmperProtect = millis();
-  //leds.blinkOn();
+
+  if(amperTmrCutOff>22) amperTmrCutOff = amperTmrCutOff - 22; // Min. time for the read sensor.
+  if(voltTmrCutOff>220) amperTmrCutOff = amperTmrCutOff - 220; // Min. time for the read sensor.
+  heaterAmmeter();
+  //lastCutOff = 0;
 }
 
 void loop(){
 
-Serial.println("-------------------------------");
-Serial.print("voltInOk = "); Serial.print(voltInOk);
-Serial.print("  ledRightIn  = "); Serial.print(digitalRead(releRightIn));
-//Serial.println(amperProtect);
-Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
-//delay(1000);
+Serial.println("---------------INIT LOOP----------------");
+
   signalOn = digitalRead(signalOnPin);
   signalHome = !digitalRead(signalHomePin);
 
-  if( testVoltInOk ) testVoltIn();
+  if( testVoltInOk_forInverter ) testVoltIn_forInverter();
   getAmperProtect();
 
   if( inverterStatus != lastInverterStatus )
   {
     digitalWrite(ledInverter, inverterStatus);
     if( inverterStatus ){
-      testVoltInOk = true;
-      tmrTestVoltInOk = millis();
+      testVoltInOk_forInverter = true;
+      tmrTestVoltInOk_forInverter = millis();
     }
     lastInverterStatus = inverterStatus;
   }
@@ -199,8 +217,15 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
   getValues(1);   // In
   rs485SerialRead();
 
+//Serial.print("voltProtect = "); Serial.println(voltProtect);
+//Serial.print("lastCutOff = "); Serial.println(lastCutOff);
+Serial.print("voltageRight = "); Serial.println(voltageRight);
+//Serial.print("overVoltValueCut = "); Serial.println(overVoltValueCut);
+//Serial.print("overVoltValueMax = "); Serial.println(overVoltValueMax);
+//Serial.print("lastVoltRightOk = "); Serial.println(lastVoltRightOk);
 
-  if(signalOn && !amperProtect && !overVolt && checkOverVolt){
+
+  if(signalOn && amperOk){
 
 // Detect external source
     if( voltRightOk != lastVoltRightOk )
@@ -236,8 +261,8 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
           digitalWrite(ledRightOut, HIGH);
           digitalWrite(releRightOut, HIGH);
           stateRight = 3;   // States 1 = Off, 2 = In, 3 = Out, 4 Error 
-          testVoltInOk = true;
-          tmrTestVoltInOk = millis();
+          testVoltInOk_forInverter = true;
+          tmrTestVoltInOk_forInverter = millis();
         }
         if( !voltInOk )
         {
@@ -246,8 +271,8 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
           digitalWrite(ledRightOut, HIGH);
           digitalWrite(releRightOut, HIGH);
           stateRight = 3;   // States 1 = Off, 2 = In, 3 = Out, 4 Error 
-          testVoltInOk = true;
-          tmrTestVoltInOk = millis();
+          testVoltInOk_forInverter = true;
+          tmrTestVoltInOk_forInverter = millis();
         }
       }
       if( signalRight && voltRightOk )
@@ -276,8 +301,8 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
           digitalWrite(ledLeftOut, HIGH);
           digitalWrite(releLeftOut, HIGH);
           stateLeft = 3;   // States 1 = Off, 2 = In, 3 = Out, 4 Error 
-          testVoltInOk = true;
-          tmrTestVoltInOk = millis();
+          testVoltInOk_forInverter = true;
+          tmrTestVoltInOk_forInverter = millis();
         }
         if( !voltInOk )
         {
@@ -286,8 +311,8 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
           digitalWrite(ledLeftOut, HIGH);
           digitalWrite(releLeftOut, HIGH);
           stateLeft = 3;   // States 1 = Off, 2 = In, 3 = Out, 4 Error 
-          testVoltInOk = true;
-          tmrTestVoltInOk = millis();
+          testVoltInOk_forInverter = true;
+          tmrTestVoltInOk_forInverter = millis();
         }
       }
       if( signalLeft && voltLeftOk )
@@ -305,7 +330,6 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
       }
       lastSignalLeft = signalLeft;
     }
-  }
 
   getValues(0);   // Home
 
@@ -319,8 +343,8 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
           digitalWrite(ledHome, HIGH);
           digitalWrite(releHome, HIGH);
           stateHome = 2;    // States 1 = Off, 2 = On, 4 Error
-          testVoltInOk = true;
-          tmrTestVoltInOk = millis();
+          testVoltInOk_forInverter = true;
+          tmrTestVoltInOk_forInverter = millis();
         }
         if( !voltInOk && !lockHome )
         {
@@ -329,11 +353,11 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
           digitalWrite(ledHome, HIGH);
           digitalWrite(releHome, HIGH);
           stateHome = 2;    // States 1 = Off, 2 = On, 4 Error
-          testVoltInOk = true;
-          tmrTestVoltInOk = millis();
+          testVoltInOk_forInverter = true;
+          tmrTestVoltInOk_forInverter = millis();
         }
       }
-      if( signalHome&& voltHomeOk )
+      if( signalHome && voltHomeOk )
       {
         stateHome = 4;
       }
@@ -349,17 +373,28 @@ Serial.print("  ledCHR = "); Serial.println(digitalRead(releCHR));
       }
       lastSignalHome = signalHome;
     }
+  }
 
   if(amperProtect)
   {
     // Blincar ledOn
   }
 
-
   rs485SerialRead();
+
+
+//Serial.println("---------------leftOff----------------");
+//Serial.print("amperValue = "); Serial.println(amperValue);
 }
 
 
+void heaterAmmeter() {
+  tmrDelayUninit = millis();
+  while(millis() < (tmrDelayUninit + tmrDelayInit) ){
+    amperValue = ammeter.getAmper();
+  }
+  
+}
 
 void rs485SerialRead() {
 /*
@@ -381,11 +416,8 @@ void rs485SerialRead() {
  * 
   */
 
-  if(rs485Serial.available()>0)// && rs485Serial.read()=='#' )
+  if(rs485Serial.available()>0)
   {
-    //char initData = rs485Serial.read();
-// Check the start of the data string
-    //if(initData=='#')
     if( rs485Serial.find('#') )
     {
       uint8_t checkData = 100;
@@ -393,7 +425,7 @@ void rs485SerialRead() {
       bool minLength = true;
       while(rs485Serial.available()<1)
       {
-        if((millis()-tmr1)>2) // 2sendT
+        if((millis()-tmr1)>2) // wait 2 millis for recived checkdata
         {
           minLength=false;
           break;
@@ -406,7 +438,7 @@ void rs485SerialRead() {
         tmr1 = millis();
         while(rs485Serial.available()<checkData)
         {
-          if((millis()-tmr1)>5)  // 5
+          if((millis()-tmr1)>5)  // wait 5 millis for all msg for verified with checkdata
           {
             minLength=false;
             break;
@@ -433,7 +465,17 @@ void rs485SerialRead() {
               signalLeft = !lastSignalLeft;
             }
           }
-          if(cmd=='C')
+          if(cmd=='H')
+          {
+            byte mode = rs485Serial.read();
+            if( mode == 1 ) // Reset
+            {
+              lastCutOff = 0;
+              overVoltValueMax = 0;
+              overAmperValueMax = 0;
+            }
+          }
+          if(cmd=='C')  // Config
           {
             byte object = rs485Serial.read();
             if( object == 0 )
@@ -450,7 +492,7 @@ void rs485SerialRead() {
             }
             if( object == 3 )
             {
-              tmrOverVoltUnprotect = rs485Serial.read() * 100;
+              voltTmrUnprotect = rs485Serial.read() * 100;
             }
             if( object == 4 )
             {
@@ -482,11 +524,11 @@ void rs485SerialRead() {
             }
             if(page=='C')
             {
-  // synq PageHighVoltage
+  // synq PageHighVoltageConfig
               NextionSYNQ(2);
             }
           }
-    /*      switch(cmd)
+    /*      switch(cmd)   I don't now but switch not working
           {
   // RELAYS
             case 'R':
@@ -533,9 +575,18 @@ void NextionSYNQ(byte a) {
   int sendLeft;
   int sendIn;
   int sendHome;
-  int sendOverVoltValue;
+  
   int sendAmper;
-  int sendOverAmperValue;
+  int sendOverVoltValueCut;
+  int sendOverVoltValueMax;
+  int sendOverAmperValueCut;
+  int sendOverAmperValueMax;
+  int sendVoltMax;
+  int sendVoltMin;
+  int sendAmperMax;
+  int sendvoltTmrUnprotect;
+  int sendTmrAmperUnprotect;
+  int sendCalicAmper;
   
   switch(a)
   {
@@ -551,34 +602,18 @@ void NextionSYNQ(byte a) {
       rs485Serial.print("pHighVoltage.LeftStat220.val=" + String(stateLeft)); FF();
       rs485Serial.print("pHighVoltage.ChrStat220.val=" + String(stateCHR)); FF();
 
-      sendIn = voltageIn*10; // sendIn = voltageIn*100;
-      rs485Serial.print("pHighVoltage.xIn.val=" + String(sendIn)); FF();
-
-      if( overVolt )
-      {
-        sendOverVoltValue = overVoltValue*10;
-        rs485Serial.print("pHighVoltage.xOverVolt.val=" + String(sendOverVoltValue)); FF();
-        rs485Serial.print("pageMain.tVolt.bco=RED"); FF();
-      }else{
-        rs485Serial.print("pageMain.tVolt.bco=17456"); FF();
-      }
-
       if( voltInOk )
       {
-        sendAmper = slowAmper*100;
+        sendAmper = amperValue*100;
         rs485Serial.print("pHighVoltage.xAmp.val=" + String(sendAmper)); FF();
-      }else{
+        FF();sendIn = voltageIn*10; // sendIn = voltageIn*100;
+        rs485Serial.print("pHighVoltage.xIn.val=" + String(sendIn)); FF();
+      } else {
         rs485Serial.print("pHighVoltage.xAmp.val=0"); FF();
+        rs485Serial.print("pHighVoltage.xIn.val=0"); FF();
       }
 
-      if( overAmper )
-      {
-        sendOverAmperValue = overAmperValue*100;
-        rs485Serial.print("pHighVoltage.xOverAmp.val=" + String(sendOverAmperValue)); FF();
-        rs485Serial.print("pageMain.tAmp.bco=RED"); FF();
-      }else{
-        rs485Serial.print("pageMain.tAmp.bco=17456"); FF();
-      }
+      rs485Serial.print("pHighVoltage.vaLastCut.val=" + String(lastCutOff)); FF();
 
       rs485Serial.print("click EndSynqHvoltag,1"); FF();
     break;
@@ -607,62 +642,51 @@ void NextionSYNQ(byte a) {
       sendHome = voltageHome*10; // sendHome = voltageHome*100;
       rs485Serial.print("pHighVoltage.xHome.val=" + String(sendHome)); FF();
 
-      if( overVolt )
+      if( voltProtect )
       {
-        sendOverVoltValue = overVoltValue*10;
-        rs485Serial.print("pHighVoltage.xOverVolt.val=" + String(sendOverVoltValue)); FF();
+        sendOverVoltValueCut = overVoltValueCut*10;
+        rs485Serial.print("pHighVoltage.xOverVolt.val=" + String(sendOverVoltValueCut)); FF();
       }
 
-      if( voltInOk )
-      {
-        sendAmper = slowAmper*100;
-        rs485Serial.print("pHighVoltage.xAmp.val=" + String(sendAmper)); FF();
-      }else{
-        rs485Serial.print("pHighVoltage.xAmp.val=0"); FF();
-      }
+      sendOverVoltValueMax = overVoltValueMax*10;
+      rs485Serial.print("pHighVoltage.xMaxVolt.val=" + String(sendOverVoltValueMax)); FF();
+
+      sendAmper = amperValue*100;
+      rs485Serial.print("pHighVoltage.xAmp.val=" + String(sendAmper)); FF();
 
       if( overAmper )
       {
-        sendOverAmperValue = overAmperValue*100;
-        rs485Serial.print("pageMain.xOverTens.val=" + String(sendOverAmperValue)); FF();
+        sendOverAmperValueCut = overAmperValueCut*10;
+        rs485Serial.print("pHighVoltage.xOverAmp.val=" + String(sendOverAmperValueCut)); FF();
       }
+
+      sendOverAmperValueMax = overAmperValueMax*10;
+      rs485Serial.print("pHighVoltage.xMaxAmper.val=" + String(sendOverAmperValueMax)); FF();
+
+      rs485Serial.print("pHighVoltage.vaLastCut.val=" + String(lastCutOff)); FF();
 
       rs485Serial.print("pHighVoltage.InverterStat.val=" + String(inverterStatus)); FF();
 
       rs485Serial.print("click EndSynqHvoltag,1"); FF();
     break;
     
-  // synq pHightVolt
+  // synq PageHighVoltageConfig
     case 2:
 
-      int sendVoltMax = voltMax;
-      int sendVoltMin = voltMin;
-      int sendAmperMax = amperMax;
-      int sendTmrOverVoltUnprotect = tmrOverVoltUnprotect / 100;
-      int sendTmrAmperUnprotect = tmrAmperUnprotect / 100;
-      int sendCalicAmper = calibAmper * 10;
+      sendVoltMax = voltMax;
+      sendVoltMin = voltMin;
+      sendAmperMax = amperMax;
+      sendvoltTmrUnprotect = voltTmrUnprotect / 100;
+      sendTmrAmperUnprotect = tmrAmperUnprotect / 100;
+      sendCalicAmper = calibAmper * 10;
                   
       FF();
       rs485Serial.print("nVmax.val=" + String(sendVoltMax)); FF();
       rs485Serial.print("nVmin.val=" + String(sendVoltMin)); FF();
       rs485Serial.print("nAmax.val=" + String(sendAmperMax)); FF();
-      rs485Serial.print("vaUnProVolt.val=" + String(sendTmrOverVoltUnprotect)); FF();
+      rs485Serial.print("vaUnProVolt.val=" + String(sendvoltTmrUnprotect)); FF();
       rs485Serial.print("vaUnProAmp.val=" + String(sendTmrAmperUnprotect)); FF();
       rs485Serial.print("xCalibAmper.val=" + String(sendCalicAmper)); FF();
-
-      if( overVolt )
-      {
-        sendOverVoltValue = overVoltValue*10;
-        rs485Serial.print("pHighVoltage.xOverVolt.val=" + String(sendOverVoltValue)); FF();
-      }
-
-      if( overAmper )
-      {
-        sendOverAmperValue = overAmperValue*10;
-        rs485Serial.print("pageMain.xOverTens.val=" + String(sendOverAmperValue)); FF();
-      }
-
-      rs485Serial.print("pHighVoltage.InverterStat.val=" + String(inverterStatus)); FF();
 
       rs485Serial.print("click EndSynqHvoltag,1"); FF();
     break;
@@ -707,178 +731,287 @@ void getInitValues() {
 
 void getValues(byte _n) {
 
-  if( overVolt && millis() > (tmrOverVoltProtect + tmrOverVoltUnprotect) )
+  if( voltProtect && millis() > (voltTmrProtect + voltTmrUnprotect) )
   {
-    overVolt = false;
+    voltProtect = false;
   }
 
-  if( !overVolt )
-  {
-    switch(_n){
-      case 0:
-        voltmeterHome.get();
-        voltageHome = voltmeterHome.getVoltage();
+  switch(_n){
+    case 0:
+      voltageHome = voltmeterHome.getVoltage();
 
+      if( !voltProtect )
+      {
         if( voltageHome > voltMin && voltageHome < voltMax )
         {
-          voltHomeOk = true, checkOverVolt = true;
-        }
-        else { voltHomeOk = false; }
-//  Over Voltage
-/*
- * Si se detecta over voltage solo en un sensor se realiza otro loop y verifica
- * si se detecta en dos sensores a la vez se activa el overVolt
- */
-        if( voltageHome > voltMax )
-        {
-          if( voltageHome > overVoltValue )
-          {
-            overVoltValue = voltageHome;
-          }
+          voltHomeOk = true;
         } else {
-          overVoltValue = 0;
+          float voltageTest = voltageHome;
+          voltageHome = voltmeterHome.getVoltage(); // 220 ms. min.
+          while( voltageHome == voltageTest );
+          //delay(voltTmrCutOff);
+          if(  voltageHome > voltMax )
+          {
+            voltHomeOk = false;
+            if( voltHomeOk != lastVoltHomeOk )
+            {
+              voltProtect = true;
+              lastCutOff = 1;
+              voltTmrProtect = millis();
+            }
+          }
+          if( voltageHome < voltMin )
+          {
+            voltHomeOk = false;
+            if( voltHomeOk != lastVoltHomeOk )
+            {
+              voltProtect = true;
+              voltTmrProtect = millis();
+            }
+          }
         }
-        if( voltageHome > voltMax && !checkOverVolt )
-        {
-          allOff();
-          overVolt = true;
-          tmrOverVoltProtect = (unsigned int)millis();
-        }
-        if( voltageHome > voltMax && checkOverVolt )
-        {
-          checkOverVolt = false;
-        }
-      break;
-      case 1:
-        voltmeterIn.get();
-        voltageIn = voltmeterIn.getVoltage();
+      }
+    break;
 
+    case 1:
+      voltageIn = voltmeterIn.getVoltage();
+
+      if( !voltProtect )
+      {
         if( voltageIn > voltMin && voltageIn < voltMax )
         {
-          voltInOk = true, checkOverVolt = true;
-        }
-        else { voltInOk = false; }
-        if( voltageIn > voltMax )
-        {
-          if( voltageIn > overVoltValue )
-          {
-            overVoltValue = voltageIn;
-          }
+          voltInOk = true;
         } else {
-          overVoltValue = 0;
+          float voltageTest = voltageIn;
+          voltageIn = voltmeterIn.getVoltage();
+          while( voltageIn == voltageTest );
+          //delay(voltTmrCutOff);
+          if( voltageIn > voltMax )
+          {
+            voltInOk = false;
+            if( voltInOk != lastVoltInOk )
+            {
+              voltProtect = true;
+              lastCutOff = 1;
+              voltTmrProtect = millis();
+            }
+          }
+          if( voltageIn < voltMin )
+          {
+            voltInOk = false;
+            if( voltInOk != lastVoltInOk )
+            {
+              voltProtect = true;
+              voltTmrProtect = millis();
+            }
+          }
         }
-        if( voltageIn > voltMax && !checkOverVolt )
-        {
-          allOff();
-          overVolt = true;
-          tmrOverVoltProtect = (unsigned int)millis();
-        }
-        if( voltageIn > voltMax && checkOverVolt )
-        {
-          checkOverVolt = false;
-        }
-      break;
-      case 2:
-        voltmeterRight.get();
-        voltageRight = voltmeterRight.getVoltage();
+      }
+    break;
+
+    case 2:
+      voltageRight = voltmeterRight.getVoltage();
+      if( !voltProtect )
+      {
         if( voltageRight > voltMin && voltageRight < voltMax )
         {
-          voltRightOk = true, checkOverVolt = true;
-        }
-        else { voltRightOk = false; }
-        if( voltageRight > voltMax )
-        {
-          if( voltageRight > overVoltValue )
-          {
-            overVoltValue = voltageRight;
-          }
+          voltRightOk = true;
         } else {
-          overVoltValue = 0;
+          float voltageTest = voltageRight;
+          voltageRight = voltmeterRight.getVoltage();
+          while( voltageRight == voltageTest );
+          //delay(voltTmrCutOff);
+          if( voltageRight > voltMax )
+          {
+            voltRightOk = false;
+            if( voltRightOk != lastVoltRightOk )
+            {
+              voltProtect = true;
+              lastCutOff = 1;
+              voltTmrProtect = millis();
+            }
+          }
+          if( voltageRight < voltMin )
+          {
+            voltRightOk = false;
+            if( voltRightOk != lastVoltRightOk )
+            {
+              voltProtect = true;
+              voltTmrProtect = millis();
+            }
+          }
         }
-        if( voltageRight > voltMax && !checkOverVolt )
-        {
-          allOff();
-          overVolt = true;
-          tmrOverVoltProtect = (unsigned int)millis();
-        }
-        if( voltageRight > voltMax && checkOverVolt )
-        {
-          checkOverVolt = false;
-        }
-      break;
-      case 3:
-        voltmeterLeft.get();
-        voltageLeft = voltmeterLeft.getVoltage();
+      }
+    break;
+
+    case 3:
+      voltageLeft = voltmeterLeft.getVoltage();
+
+      if( !voltProtect )
+      {
         if( voltageLeft > voltMin && voltageLeft < voltMax )
         {
-          voltLeftOk = true, checkOverVolt = true;
-        }
-        else { voltLeftOk = false; }
-        if( voltageLeft > voltMax )
-        {
-          if( voltageLeft > overVoltValue )
-          {
-            overVoltValue = voltageLeft;
-          }
+          voltLeftOk = true;
         } else {
-          overVoltValue = 0;
+          float voltageTest = voltageLeft;
+          voltageLeft = voltmeterLeft.getVoltage();
+          while( voltageLeft == voltageTest );
+          //delay(voltTmrCutOff);
+          if( voltageLeft > voltMax )
+          {
+            voltLeftOk = false;
+            if( voltLeftOk != lastVoltLeftOk )
+            {
+              voltProtect = true;
+              lastCutOff = 1;
+              voltTmrProtect = millis();
+            }
+          }
+          if( voltageLeft < voltMin )
+          {
+            voltLeftOk = false;
+            if( voltLeftOk != lastVoltLeftOk )
+            {
+              voltProtect = true;
+              voltTmrProtect = millis();
+            }
+          }
         }
-        if( voltageLeft > voltMax && !checkOverVolt )
-        {
-          allOff();
-          overVolt = true;
-          tmrOverVoltProtect = (unsigned int)millis();
-        }
-        if( voltageLeft > voltMax && checkOverVolt )
-        {
-          checkOverVolt = false;
-        }
-      break;
+      }
+    break;
+  }
+  
+    getOverVoltValueCut();
+  
+  getOverVoltValueMax();
+}
+
+void getOverVoltValueCut() {
+  if( voltageHome > voltMax || voltageIn > voltMax || voltageRight > voltMax || voltageLeft > voltMax )
+  {
+    overVolt = true;
+    if( overVolt != overVoltLast )
+    {
+      if( voltageHome > voltMax )
+      {
+        overVoltValueCut = voltageHome;
+      } else if( voltageIn > voltMax )
+      {
+        overVoltValueCut = voltageIn;
+      } else if( voltageRight > voltMax )
+      {
+        overVoltValueCut = voltageRight;
+      } else if( voltageLeft > voltMax )
+      {
+        overVoltValueCut = voltageLeft;
+      }
+      overVoltLast = overVolt;
+    } else if( voltageHome > overVoltValueCut )
+    {
+      overVoltValueCut = voltageHome;
+    }else if( voltageIn > overVoltValueCut )
+    {
+      overVoltValueCut = voltageIn;
+    }else if( voltageRight > overVoltValueCut )
+    {
+      overVoltValueCut = voltageRight;
+    }else if( voltageLeft > overVoltValueCut )
+    {
+      overVoltValueCut = voltageLeft;
     }
+  } else {
+    overVolt = false;
+    overVoltLast = overVolt;
+    // Dejamos en memoria el valor más alto de overVolt
   }
 }
 
-void testVoltIn() {
+void getOverVoltValueMax() {
+  if( voltageHome > overVoltValueMax )
+  {
+    overVoltValueMax = voltageHome;
+  } else if( voltageIn > overVoltValueMax )
+  {
+    overVoltValueMax = voltageIn;
+  } else if( voltageRight > overVoltValueMax )
+  {
+    overVoltValueMax = voltageRight;
+  } else if( voltageLeft > overVoltValueMax )
+  {
+    overVoltValueMax = voltageLeft;
+  }
+}
+
+void testVoltIn_forInverter() {
   // Wait seconds fro init test
-  if( testVoltInOk && millis() > (tmrTestVoltInOk + tmrMaxTestVoltInOk) )
+  if( testVoltInOk_forInverter && millis() > (tmrTestVoltInOk_forInverter + tmrMaxTestVoltInOk_forInverter) )
   {
     if( !voltageIn )
     {
+// chnState
       allOff();
     }
   }
 }
 
 void getAmperProtect() {
-  if( amperProtect && millis() > (tmrAmperProtect + tmrAmperUnprotect) ){ amperProtect = false; }
-  if( voltInOk )
+  if( amperProtect && millis() > (tmrAmperProtect + tmrAmperUnprotect) )
   {
-    ammeter.get();
-    slowAmper = ammeter.getAmperSlow();
-    if( !amperProtect )
-    {
-      if (slowAmper <= amperMax){
-        amperOk = true;
-      } else {
-// chnState
+    amperOk = true;
+    amperProtect = false;
+  }
+// !voltInOk no date ammeter.getAmper() for case !amperProtect && !amperOk
+  if( !voltInOk && !amperProtect && !amperOk )
+  {
+    amperValue = ammeter.getAmper();
+    if (amperValue <= amperMax){
+      amperOk = true;
+    }
+  }
+// Normal case
+  if( voltInOk && !amperProtect )
+  {
+    amperValue = ammeter.getAmper();
+    if (amperValue <= amperMax){
+      amperOk = true;
+    } else {
+      float amperTest = amperValue;
+      amperValue = ammeter.getAmper();
+      while( amperValue == amperTest ); // 22 ms
+      delay(amperTmrCutOff);
+      if (amperValue > amperMax){
         allOff();
         amperOk = false;
         amperProtect = true;
+        lastCutOff = 2;
         tmrAmperProtect = millis();
       }
     }
-  } else {
-    slowAmper=0;
   }
-  if (slowAmper > amperMax)
+
+  getOverAmperValue();
+  if(amperValue > overAmperValueMax)
+  {
+    overAmperValueMax = amperValue;
+  }
+}
+
+void getOverAmperValue() {
+  if (voltInOk && amperValue > amperMax)
   {
     overAmper = true;
-    if( slowAmper > overAmperValue )
+    if( overAmper != overAmperLast )
     {
-      overAmperValue = slowAmper;
+      overAmperValueCut = amperValue;
+      overAmperLast = overAmper;
+    } else if( amperValue > overAmperValueCut )
+    {
+      overAmperValueCut = amperValue;
     }
   } else {
     overAmper = false;
+    overAmperLast = overAmper;
+    // Dejamos en memoria el valor más alto de overAmperValueCut
   }
 }
 
@@ -890,13 +1023,12 @@ void allOff() {
   digitalWrite(releRightIn, LOW);
   digitalWrite(releLeftOut, LOW);
   digitalWrite(releLeftIn, LOW);
-  digitalWrite(releCHR, LOW);
   digitalWrite(ledHome, LOW);
   digitalWrite(ledRightOut, LOW);
   digitalWrite(ledRightIn, LOW);
   digitalWrite(ledLeftOut, LOW);
   digitalWrite(ledLeftIn, LOW);
-  digitalWrite(ledCHR, LOW);
+  chrControl();
   lastVoltRightOk = !voltRightOk;
   lastVoltLeftOk = !voltLeftOk;
   signalRight = 0;
@@ -904,20 +1036,16 @@ void allOff() {
   stateHome = 1;    // States 1 = Off, 2 = On, 4 Error
   stateRight = 1;   // States 1 = Off, 2 = In, 3 = Out, 4 Error
   stateLeft = 1;   // States 1 = Off, 2 = In, 3 = Out, 4 Error
-  stateCHR = 1;    // States 1 = Off, 2 = On, 4 Error
-  testVoltInOk = false;
+  testVoltInOk_forInverter = false;
 }
 
 void rightOn() {
   if( !voltInOk )
   {
-    delay(10);
-    digitalWrite(ledCHR, HIGH);
-    digitalWrite(releCHR, HIGH);
     digitalWrite(ledRightIn, HIGH);
     digitalWrite(releRightIn, HIGH);
+    chrControl();
     stateRight = 2;   // States 1 = Off, 2 = In, 3 = Out, 4 Error
-    stateCHR = 2;    // States 1 = Off, 2 = On, 4 Error
     lastVoltRightOk = voltRightOk;
   } else {
     if( voltLeftOk )
@@ -947,23 +1075,18 @@ void rightOff() {
   signalRight = 0;
   digitalWrite(ledRightIn, LOW);
   digitalWrite(releRightIn, LOW);
+  chrControl();
   stateRight = 1;   // States 1 = Off, 2 = In, 3 = Out, 4 Error
-  digitalWrite(ledCHR, LOW);
-  digitalWrite(releCHR, LOW);
-  stateCHR = 1;    // States 1 = Off, 2 = On, 4 Error
   lastVoltRightOk = voltRightOk;
 }
 
 void leftOn() {
   if( !voltInOk )
   {
-    delay(10);
-    digitalWrite(ledCHR, HIGH);
-    digitalWrite(releCHR, HIGH);
     digitalWrite(ledLeftIn, HIGH);
     digitalWrite(releLeftIn, HIGH);
-    stateLeft = 2;   // States 1 = Off, 2 = In, 3 = Out, 4 Error 
-    stateCHR = 2;    // States 1 = Off, 2 = On, 4 Error
+    chrControl();
+    stateLeft = 2;   // States 1 = Off, 2 = In, 3 = Out, 4 Error
     lastVoltLeftOk = voltLeftOk;
   } else{
     if( voltRightOk )
@@ -993,11 +1116,22 @@ void leftOff() {
   signalLeft = 0;
   digitalWrite(ledLeftIn, LOW);
   digitalWrite(releLeftIn, LOW);
+  chrControl();
   stateLeft = 1;   // States 1 = Off, 2 = In, 3 = Out, 4 Error 
-  digitalWrite(ledCHR, LOW);
-  digitalWrite(releCHR, LOW);
-  stateCHR = 1;    // States 1 = Off, 2 = On, 4 Error
   lastVoltLeftOk = voltLeftOk;
+}
+
+void chrControl() {
+  if( digitalRead(releLeftIn) || digitalRead(releRightIn) )
+  {
+    digitalWrite(ledCHR, HIGH);
+    digitalWrite(releCHR, HIGH);
+    stateCHR = 2;    // States 1 = Off, 2 = On, 4 Error
+  } else {
+    digitalWrite(ledCHR, LOW);
+    digitalWrite(releCHR, LOW);
+    stateCHR = 1;    // States 1 = Off, 2 = On, 4 Error
+  }
 }
 
 //         END FUNCTIONS
