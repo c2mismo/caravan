@@ -19,7 +19,7 @@
 
 //           LIBRARY CONF
 
-#define  _DEBUG_
+//#define  _DEBUG_
 
 #include "Arduino.h"
 #include "Leds.h"
@@ -177,8 +177,9 @@ void setup(){
 }
 
 void loop(){
-
-Serial.println("---------------INIT LOOP----------------");
+#ifdef _DEBUG_
+//Serial.println("---------------INIT LOOP----------------");
+#endif
 
   signalOn = digitalRead(signalOnPin);
   signalHome = !digitalRead(signalHomePin);
@@ -217,13 +218,14 @@ Serial.println("---------------INIT LOOP----------------");
   getValues(1);   // In
   rs485SerialRead();
 
+#ifdef _DEBUG_
 //Serial.print("voltProtect = "); Serial.println(voltProtect);
 //Serial.print("lastCutOff = "); Serial.println(lastCutOff);
-Serial.print("voltageRight = "); Serial.println(voltageRight);
+//Serial.print("voltageRight = "); Serial.println(voltageRight);
 //Serial.print("overVoltValueCut = "); Serial.println(overVoltValueCut);
 //Serial.print("overVoltValueMax = "); Serial.println(overVoltValueMax);
 //Serial.print("lastVoltRightOk = "); Serial.println(lastVoltRightOk);
-
+#endif
 
   if(signalOn && amperOk){
 
@@ -382,9 +384,10 @@ Serial.print("voltageRight = "); Serial.println(voltageRight);
 
   rs485SerialRead();
 
-
+#ifdef _DEBUG_
 //Serial.println("---------------leftOff----------------");
 //Serial.print("amperValue = "); Serial.println(amperValue);
+#endif
 }
 
 
