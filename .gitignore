@@ -22,7 +22,7 @@
 
 # OTHERS
 *.lnk
-Thumbs.db
+Thumbs*
 *encryptable
 tmp
 
