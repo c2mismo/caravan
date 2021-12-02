@@ -22,9 +22,10 @@
 
 # OTHERS
 *.lnk
-Thumbs.db
+Thumbs*
 *encryptable
 tmp
+*Editor_dxgi.log
 
 
 # vscode & platformIO
