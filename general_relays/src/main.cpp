@@ -43,6 +43,7 @@ const byte relesPin  [32] {  5,   4,   3,   2,  22,  23,  24,  25,  26,  27,  28
 uint8_t relePin;
 
 
+
 void setup() {
   Serial.begin(9600);
   rs485Serial.begin(57600);
@@ -65,9 +66,63 @@ void setup() {
   delay(20);
 }
 
-void loop() {
-  rs485SerialRead();
 
+void FF() {
+  rs485Serial.print("\xFF\xFF\xFF");
+}
+
+void sendStatReleLedSalon() {
+  delay(1);
+Serial.print("ledSalonPin = "); Serial.println(String(!digitalRead(ledSalonPin)));
+  byte bufSend[] = { '#', 6, 'S', 'Q', 'G', relePin, nameObject, !digitalRead(ledSalonPin) };
+  rs485Serial.write(bufSend, 8);
+}
+
+void NextionSYNQ(byte a) {
+// RELAY's
+  switch(a)
+  {
+  // synq PageMain
+    case 0:
+Serial.print("NextionSYNQ = "); Serial.println(a);
+      for (byte i=0;i<32;i++)
+      {
+        if(!digitalRead(relesPin[i]))  // (ON) Trigger Low Level
+        {
+          rs485Serial.print("pageMain.tPin" + String(relesPin[i]) + ".picc=2"); FF();
+        } else if(digitalRead(relesPin[i]))   // (OFF)
+        {
+          rs485Serial.print("pageMain.tPin" + String(relesPin[i]) + ".picc=1"); FF();
+        }
+      }
+      if(!digitalRead(fanSalonPin))  // (ON) Trigger Low Level
+      {
+        rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
+      } else if(digitalRead(fanSalonPin))   // (OFF)
+      {
+        rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
+      }
+      rs485Serial.print("click EndSynqReles,1"); FF();
+    break;
+  // synq Fan Salon
+    case 1:
+      if(fanSalonMode==1 || fanSalonMode==2) // ON
+      { // Value
+        rs485Serial.print("pageCmdFan.t2.txt=\"ON\""); FF();
+        rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
+        rs485Serial.print("pageCmdFan.n0.val=pageCmdFan.h0.val"); FF();
+        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
+      }
+      if(fanSalonMode==0) // OFF
+      { // OFF
+        rs485Serial.print("pageCmdFan.t2.txt=\"OFF\""); FF();
+        rs485Serial.print("pageCmdFan.h0.val=1"); FF();
+        rs485Serial.print("pageCmdFan.n0.val=0"); FF();
+        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
+      }
+      rs485Serial.print("click EndSynqReles,1"); FF();
+    break;
+  }
 }
 
 void rs485SerialRead() {
@@ -326,63 +381,9 @@ Serial.print("nameObject = "); Serial.println(String(nameObject));
   }
 }
 
+void loop() {
+  rs485SerialRead();
 
-void sendStatReleLedSalon() {
-  delay(1);
-Serial.print("ledSalonPin = "); Serial.println(String(!digitalRead(ledSalonPin)));
-  byte bufSend[] = { '#', 6, 'S', 'Q', 'G', relePin, nameObject, !digitalRead(ledSalonPin) };
-  rs485Serial.write(bufSend, 8);
-}
-
-void NextionSYNQ(byte a) {
-// RELAY's
-  switch(a)
-  {
-  // synq PageMain
-    case 0:
-Serial.print("NextionSYNQ = "); Serial.println(a);
-      for (byte i=0;i<32;i++)
-      {
-        if(!digitalRead(relesPin[i]))  // (ON) Trigger Low Level
-        {
-          rs485Serial.print("pageMain.tPin" + String(relesPin[i]) + ".picc=2"); FF();
-        } else if(digitalRead(relesPin[i]))   // (OFF)
-        {
-          rs485Serial.print("pageMain.tPin" + String(relesPin[i]) + ".picc=1"); FF();
-        }
-      }
-      if(!digitalRead(fanSalonPin))  // (ON) Trigger Low Level
-      {
-        rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
-      } else if(digitalRead(fanSalonPin))   // (OFF)
-      {
-        rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
-      }
-      rs485Serial.print("click EndSynqReles,1"); FF();
-    break;
-  // synq Fan Salon
-    case 1:
-      if(fanSalonMode==1 || fanSalonMode==2) // ON
-      { // Value
-        rs485Serial.print("pageCmdFan.t2.txt=\"ON\""); FF();
-        rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-        rs485Serial.print("pageCmdFan.n0.val=pageCmdFan.h0.val"); FF();
-        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
-      }
-      if(fanSalonMode==0) // OFF
-      { // OFF
-        rs485Serial.print("pageCmdFan.t2.txt=\"OFF\""); FF();
-        rs485Serial.print("pageCmdFan.h0.val=1"); FF();
-        rs485Serial.print("pageCmdFan.n0.val=0"); FF();
-        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
-      }
-      rs485Serial.print("click EndSynqReles,1"); FF();
-    break;
-  }
-}
-
-void FF(){
-  rs485Serial.print("\xFF\xFF\xFF");
 }
 
 /*

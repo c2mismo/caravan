@@ -13,7 +13,7 @@
  */
 
 
-#define _DEBUG_
+// #define _DEBUG_
 #define _TMR_
 
 const byte flowmeterRX = 2;
