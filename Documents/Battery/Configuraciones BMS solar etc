@@ -1,0 +1,57 @@
+
+
+SOLAR
+
+Se podría configurar si no queda más remedio como GEL
+
+Verificamos tensiones reale y comparamos tanto la lectura del
+voltímetro, del BMS del shunt y del solar
+y con ello rectificamos parámetros
+
+
+Para configurarlo seguir los diferentes pasos en orden:
+
+1- Batt type > USER
+2- Batt AH > 300
+3- Temp Comp Coeff. > -3mV/ºC/2V
+4- Rated Voltage > 24V
+
+Guardamos y empezamos a configurar mas específicammente,
+es preferible tener los parámetros un poco bajos
+para prolongar la vida útil de la batería:
+
+5- Boost time > 40 min.
+6- Equalize time > 0 min.
+
+7- Discharge limit > 21.0
+8- Low Volt. Disc. > 22.0
+9- Under Volt. Warn > 22.0
+10- Under Volt. Rect. > 26.4
+
+11- Boost Rec. > 26.6
+12- Float Charge >27.0
+13- Boost Charge > 28.4
+
+14- Equal Charge > 28.4
+
+15- Over Volt. Rec. > 28.4
+16- Charget Limit > 28.4
+17- Over Volt. Disc. > 28.8
+
+18- Low Volt. Rec. > 26.4
+
+
+BMS
+
+Voltage máximo por celda 3.75V > 3.60V
+Tensión máxima total 30.00V > 28.80V
+Tensión mínima 17.60V > 22.00V
+
+
+
+
+
+Es mejor sacrificar aproximadamente un 5% de la carga, pero alargaremos la vida útil de la batería.
+
+
+Fnt: https://ycomosehace.es/smart-bms/
