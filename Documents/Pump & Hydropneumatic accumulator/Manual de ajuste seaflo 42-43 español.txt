@@ -1,0 +1,41 @@
+﻿
+Ajustar la válvula de derivación y el interruptor de presión
+
+ El ajuste de derivación debe ser realizado por un técnico profesional utilizando un calibre y equipo adecuados. Sin el equipo adecuado, puede ajustar mal la válvula o el interruptor, lo que hace que la bomba funcione de manera incorrecta (ver precaución a continuación).
+
+
+Sobre la válvula de derivación
+
+ La bomba utiliza una válvula de derivación cargada de resorte para mantener un rendimiento suave a medida que las demandas de agua aumentan y caen.
+Cuando se enciende un grifo, la bomba proporciona un flujo de agua total, por lo que la válvula de derivación está cerrada.
+ Pero cuando hay poca o ninguna demanda de agua, la válvula de derivación se abre para permitir que el agua fluya desde el lado de la salida al lado de la entrada, manteniendo un flujo constante de agua dentro de la bomba casi sin ciclismo.
+
+
+Ajuste de la presión de cierre de la bomba:
+
+ Para elevar la presión de cierre, use una llave Allen de 2 mm para girar el tornillo del interruptor de presión en el sentido de las agujas del reloj a la presión deseada.
+(Nota: Se encuentra bajo una tapa con un tornillo 2 PH.)
+
+ Para bajar la presión de cierre, use una llave Allen de 2 mm para girar el tornillo del interruptor de presión en sentido antihorario a la presión deseada.
+
+
+Ajustar el bypass:
+
+ Para elevar la presión a la que comienza el bypass y eleva la presión de derivación completa, use una llave Allen de 2 mm para girar el tornillo de derivación en sentido horario a la presión deseada.
+
+ Para bajar la presión a la que comienza el bypass y disminuir la presión de derivación completa, use una llave Allen de 2 mm para girar el tornillo de derivación en sentido antihorario a la presión deseada.
+
+
+PRECAUCIÓN:
+ El ajuste de presión para el bypass completo debe ser al menos 8psi más alto que la presión de cierre de la bomba. Si el interruptor y el bypass se ajustan demasiado de cerca, la derivación y el apagado del interruptor pueden superponerse y la bomba no se apagará
+
+
+
+
+
+
+
+
+
+
+
