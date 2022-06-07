@@ -1,5 +1,6 @@
 
-Queria mostrar la zona seleccionada.
+
+Para los LEDs queria mostrar la zona seleccionada.
 
 Problemas encontrados:
 
@@ -17,5 +18,18 @@ hay que buscar metodo para truncar el lado izquierdo.
 Por falta de tiempo y no viendo necesario, para futuro...
 
 
+
+Pendientes
+*************
+
+Teclado:
+
+Ampliar zonas de touch
+
+quitar transparencia
+
+Añadir para encendido de relés
+nombre del relé o línea sobre la que actua
+y tipo de password user o admin.
 
 
