@@ -16,11 +16,11 @@ byte fanSalonValueRaw;
 int fanSalonValue;
 const byte fanSalonPin = 46;
 const byte fanSalonName = 0;    //  0=Salon
-const int fanSalonActiv = 1510;
-const int fanSalonStarter = 1575;
+const int fanSalonActiv = 1010;    //  ESCforCAR = 1510
+const int fanSalonStarter = 1075;    //  ESCforCAR = 1575
 const int fanSalonStarterDelay = 1000;
-const int fanSalonMin = 1559;
-const int fanSalonMax = 1615;
+const int fanSalonMin = 1059;    //  ESCforCAR = 1559
+const int fanSalonMax = 1615;    //  ESCforCAR = 1615
 byte fanSalonMode;        // Save data for synq
 
 #define rs485Serial Serial3
