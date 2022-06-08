@@ -284,13 +284,12 @@ Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
                     {
                       fanSalonValueRaw=1;
                       digitalWrite(fanSalonPin, HIGH); // Low trigger  OFF
-                      /*
                       rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
                       rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
                       rs485Serial.print("pageCmdFan.t2.txt=\"ON\""); FF();
                       rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
                       rs485Serial.print("pageCmdFan.n0.val=0"); FF();
-                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();*/
+                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();
                     }
                   }
                 break;
@@ -309,13 +308,12 @@ Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
                                                     // debe estar fuera de el proceso de lectura
                       
                       escSalon.writeMicroseconds(fanSalonMin);
-                      /*
                       rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
                       rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
                       rs485Serial.print("pageCmdFan.t2.txt=\"OFF\""); FF();
                       rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
                       rs485Serial.print("pageCmdFan.n0.val=" + String(fanSalonValueRaw)); FF();
-                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();*/
+                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();
                     }
                   }
                 break;
