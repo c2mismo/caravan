@@ -12,15 +12,15 @@ Servo escSalon;
 const byte escSalonPin = 6;
 byte fanPin;
 byte fanName;
-byte fanSalonValueRaw;
-int fanSalonValue;
-const byte fanSalonPin = 46;
-const byte fanSalonName = 0;    //  0=Salon
-const int fanSalonActiv = 1010;    //  ESCforCAR = 1510
+byte fanSalonValueRaw=1;      // 1~255
+int fanSalonValue=0;
+const byte fanSalonPin = 47;
+const byte fanSalonName = 6;    //  6=Salon
+const int fanSalonActiv = 1000;    //  ESCforCAR = 1510
 const int fanSalonStarter = 1075;    //  ESCforCAR = 1575
 const int fanSalonStarterDelay = 1000;
-const int fanSalonMin = 1059;    //  ESCforCAR = 1559
-const int fanSalonMax = 1615;    //  ESCforCAR = 1615
+const int fanSalonMin = 1045;    //  ESCforCAR = 1559
+const int fanSalonMax = 1250;    //  ESCforCAR = 1615
 byte fanSalonMode;        // Save data for synq
 
 #define rs485Serial Serial3
@@ -108,19 +108,14 @@ Serial.print("NextionSYNQ = "); Serial.println(a);
     case 1:
       if(fanSalonMode==1 || fanSalonMode==2) // ON
       { // Value
-        rs485Serial.print("pageCmdFan.t2.txt=\"ON\""); FF();
-        rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-        rs485Serial.print("pageCmdFan.n0.val=pageCmdFan.h0.val"); FF();
-        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
+        rs485Serial.print("pVaFanPasillo.vaPasilloPic.val=1"); FF();
+        rs485Serial.print("pVaFanPasillo.vaPasilloVal.val=" + String(fanSalonValueRaw)); FF();
       }
       if(fanSalonMode==0) // OFF
       { // OFF
-        rs485Serial.print("pageCmdFan.t2.txt=\"OFF\""); FF();
-        rs485Serial.print("pageCmdFan.h0.val=1"); FF();
-        rs485Serial.print("pageCmdFan.n0.val=0"); FF();
-        rs485Serial.print("pageCmdFan.t2.bco=17456"); FF();
+        rs485Serial.print("pVaFanPasillo.vaPasilloPic.val=0"); FF();
       }
-      rs485Serial.print("click EndSynqReles,1"); FF();
+      rs485Serial.print("click EndSynqFan,1"); FF();
     break;
   }
 }
@@ -273,11 +268,13 @@ Serial.print("cmd = "); Serial.println(cmd);
             case 'F':
               fanPin = rs485Serial.read();  // Pin Vdc esc
               fanName = rs485Serial.read();  // Name
+Serial.print("fanName = "); Serial.println(fanName);
+Serial.print("fanSalonName = "); Serial.println(fanSalonName);
               fanSalonMode = rs485Serial.read();  // State = 00 OFF, 01 ON, 02 Value (now change state)
 Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
               switch(fanSalonMode)
               {
-                case 0: // Fan OFF
+                case 0: // OFF
                   if(fanPin==fanSalonPin)
                   {
                     if(fanName==fanSalonName)
@@ -286,14 +283,11 @@ Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
                       digitalWrite(fanSalonPin, HIGH); // Low trigger  OFF
                       rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
                       rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
-                      rs485Serial.print("pageCmdFan.t2.txt=\"ON\""); FF();
-                      rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-                      rs485Serial.print("pageCmdFan.n0.val=0"); FF();
-                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();
+                      NextionSYNQ(1);
                     }
                   }
                 break;
-                case 1: // Fan ON
+                case 1: // ON
   Serial.println("ON");
                   if(fanPin==fanSalonPin)
                   {
@@ -310,10 +304,7 @@ Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
                       escSalon.writeMicroseconds(fanSalonMin);
                       rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
                       rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
-                      rs485Serial.print("pageCmdFan.t2.txt=\"OFF\""); FF();
-                      rs485Serial.print("pageCmdFan.h0.val=" + String(fanSalonValueRaw)); FF();
-                      rs485Serial.print("pageCmdFan.n0.val=" + String(fanSalonValueRaw)); FF();
-                      rs485Serial.print("pageCmdFan.t2.pic=23"); FF();
+                      NextionSYNQ(1);
                     }
                   }
                 break;
@@ -345,11 +336,11 @@ Serial.print("fanSalonValue = ");Serial.println(fanSalonValue);
                   pinVcc = rs485Serial.read();
                   switch(pinVcc)
                   {
-                    case 46:
+                    case 47:
                       nameObject = rs485Serial.read();  // Name
                       switch(nameObject)
                       {
-                        case 0:         //  WC
+                        case 6:         //  WC
                           NextionSYNQ(1);
                         break;
                       }
