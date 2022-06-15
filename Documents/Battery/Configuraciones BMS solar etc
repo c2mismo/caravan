@@ -40,8 +40,10 @@ para prolongar la vida útil de la batería:
 
 18- Low Volt. Rec. > 26.4
 
+*************************************************
+*************************************************
 
-BMS
+BMS Config
 
 Voltage máximo por celda 3.75V -> 3.60V
 Tensión máxima total 30.00V -> 28.80V
@@ -55,3 +57,30 @@ Es mejor sacrificar aproximadamente un 5% de la carga, pero alargaremos la vida 
 
 
 Fnt: https://ycomosehace.es/smart-bms/
+
+
+*************************************************
+*************************************************
+
+SHUNT config
+
+Preset Battery AH Value > 300AH
+AH Remaining > 
+Under Voltage Protection LVP > 22V
+Over Voltag3 Protection OVP > 28.8V
+Positive Over Current Protection OCP > 200A
+Negative Over Current Protection NCP > 200A
+Over Pwer Protection OPP > 
+Over Temperature Protection OTP > 70º
+Reverting Time Protection > 5s
+Set Address > 01-01
+Set Delay Time > 15
+Monitor Function > ON
+Monitor > ON
+Relay Mode > NO
+Restore Factory Setting
+
+
+
+
+
