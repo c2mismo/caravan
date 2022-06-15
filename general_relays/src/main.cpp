@@ -16,11 +16,11 @@ byte fanSalonValueRaw=1;      // 1~255
 int fanSalonValue=0;
 const byte fanSalonPin = 47;
 const byte fanSalonName = 6;    //  6=Salon
-const int fanSalonActiv = 1000;    //  ESCforCAR = 1510
-const int fanSalonStarter = 1075;    //  ESCforCAR = 1575
+const int fanSalonActiv = 1005;    //  ESCforCAR = 1510
+const int fanSalonStarter = 1100;    //  ESCforCAR = 1575
 const int fanSalonStarterDelay = 1000;
 const int fanSalonMin = 1045;    //  ESCforCAR = 1559
-const int fanSalonMax = 1250;    //  ESCforCAR = 1615
+const int fanSalonMax = 1250;    //  1250 ESCforCAR = 1615
 byte fanSalonMode;        // Save data for synq
 
 #define rs485Serial Serial3
@@ -268,10 +268,10 @@ Serial.print("cmd = "); Serial.println(cmd);
             case 'F':
               fanPin = rs485Serial.read();  // Pin Vdc esc
               fanName = rs485Serial.read();  // Name
-Serial.print("fanName = "); Serial.println(fanName);
-Serial.print("fanSalonName = "); Serial.println(fanSalonName);
+//Serial.print("fanName = "); Serial.println(fanName);
+//Serial.print("fanSalonName = "); Serial.println(fanSalonName);
               fanSalonMode = rs485Serial.read();  // State = 00 OFF, 01 ON, 02 Value (now change state)
-Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
+//Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
               switch(fanSalonMode)
               {
                 case 0: // OFF
@@ -279,8 +279,8 @@ Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
                   {
                     if(fanName==fanSalonName)
                     {
-                      fanSalonValueRaw=1;
-                      digitalWrite(fanSalonPin, HIGH); // Low trigger  OFF
+                      fanSalonValueRaw=1;//fanSalonPin
+                      digitalWrite(48, HIGH); // Low trigger  OFF
                       rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
                       rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
                       NextionSYNQ(1);
@@ -294,10 +294,10 @@ Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
                     if(fanName==fanSalonName)
                     {
                       fanSalonValueRaw=1;
-                      digitalWrite(fanSalonPin, LOW); // Low trigger   ON
                       escSalon.writeMicroseconds(fanSalonActiv);  // Init esc
+                      digitalWrite(48, LOW); // Low trigger   ON
                       delay(1);
-                      escSalon.writeMicroseconds(fanSalonStarter);
+                      escSalon.writeMicroseconds(1500);//fanSalonStarter
                       delay(fanSalonStarterDelay);   // Para hacer un "delay por millis" todo lo siguiente
                                                     // debe estar fuera de el proceso de lectura
                       
@@ -314,7 +314,7 @@ Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
                     if(fanName==fanSalonName)
                     {
                       fanSalonValueRaw = rs485Serial.read();  // Value RAW Signal esc
-                      fanSalonValue = map(fanSalonValueRaw, 0, 100, fanSalonMin, fanSalonMax);  // Value Signal esc
+                      fanSalonValue = map(fanSalonValueRaw, 1, 255, fanSalonMin, fanSalonMax);  // Value Signal esc
                       escSalon.writeMicroseconds(fanSalonValue);
                     }
 Serial.print("fanSalonValue = ");Serial.println(fanSalonValue);
