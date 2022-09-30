@@ -1,0 +1,101 @@
+
+
+añadir:
+Resistencia de 330OHM (220~470OHM) en la linea de datos entre el MCU y la tira de leds
+Condensador de 100UF entre el positivo y el GND de la tira de leds
+Fnt:
+https://www.circuitschools.com/diy-smart-led-strip-with-sound-reactive-effects-using-esp8266-esp32-wifi/
+
+
+Vamos a usar un ESP32 y dejar abilitado para un futuro añadirle Microfono
+
+
+PINS Microfono
+
+Del microfono al ESP32
+PDM(data-in) -> GPIO22
+Del ESP32 al microfono
+PDM(ws) -> GPIO19
+
+Led Strip(data) -> GPIO21		(usar cambio de nivel 3.3 a 5V)
+
+TX2 -> GPIO10
+RX2 -> GPIO9
+
+Instalar dependencias en linux:
+touch temppip.sh
+gedit temppip.sh
+copiar:
+///////////////
+sudo apt-get install git && \
+wget https://bootstrap.pypa.io/get-pip.py && \
+sudo python3 get-pip.py && \
+sudo pip3 install pyserial && \
+mkdir -p ~/Arduino/hardware/espressif && \
+cd ~/Arduino/hardware/espressif && \
+git clone https://github.com/espressif/arduino-esp32.git esp32 && \
+cd esp32/tools && \
+python3 get.py
+//////////////////
+chmod u+x temppip.sh
+./temppip.sh
+rm temppip.sh
+
+para que arduino IDE reconozca python:
+sudo apt install python-is-python3
+
+El mensaje:
+Hard resetting via RTS pin...
+No es un error, te indica que ha dejado la comunicacion en modo espera, para recibir datos.
+
+Firmwares:
+FastLED
+Archivo > Preferencias > Gestor de URLs Adicionales de Targetas > Pulsa en el icono y añade nueva línea con :
+https://dl.espressif.com/dl/package_esp32_index.json
+https://resource.heltec.cn/download/package_heltec_esp32_index.json
+Herramientas > Placa: > Gestor dfe targetas
+esp32 by Espressif Systems
+NodeMCU-32S
+
+
+Fnt:
+https://github.com/zhujisheng/audio-reactive-led-strip
+
+Para controlarlo por PC via Wifi
+https://github.com/scottlawsonbc/audio-reactive-led-strip
+
+
+Leer:
+https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/ledc.html
+https://diyi0t.com/sound-sensor-arduino-esp8266-esp32/
+
+
+NOTAS:
+UART el 0 es el de depuracion y programacion mejor no usar
+pàra el 1 o 2 usar pines del 13 al 33
+
+HardwareSerial Serial2(1); // Use UART channel 1
+// HardwareSerial Serial2(2); // Use UART channel 2
+void setup()
+{
+  Serial2.begin(115200, SERIAL_8N1, 14, 15);
+  //  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+}
+
+void loop()
+{
+  Serial2.println("bong");
+  delay(1000);
+}
+
+
+Utiliza los pines 14 y 15 para crear una interfaz serial llamada Serial2 usando 8 bits, sin paridad y 1 bit de parada, luego emite un mensaje ("bong") en los pines cada segundo.
+
+Fnt:
+https://arduino.stackexchange.com/questions/77423/uno-esp32-softwareserial-communication-wont-work
+https://forum.arduino.cc/t/esp32-software-serial-compiling-error/945233/4
+
+
+
+
+

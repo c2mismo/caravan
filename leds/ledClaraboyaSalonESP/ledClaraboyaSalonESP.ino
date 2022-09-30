@@ -2,9 +2,7 @@
 //#define _DEBUG_Q_ // Simulation SINQ Nextion with General Rele
 
 // #include "arduino.h"
-#include <SoftwareSerial.h>
-//SoftwareSerial rs485Serial(16, 14); // RX, TX
-SoftwareSerial rs485Serial(16, 14); // RX, TX
+HardwareSerial Serial2(1); // Use UART channel 1 TX 10 RX 9
 byte nextionPing;
 byte state=1;
 
@@ -22,8 +20,9 @@ byte valueNew;
 byte numLed;
 
 
+#include <SPI.h> //
 #include <FastLED.h>
-const byte ledSalonPin = 5;
+const byte ledSalonPin = 21;
 const byte ledSalonLEDS = 130;
 CRGB ledSalon[ledSalonLEDS];  // Con el constructor creamos el array RGB
 byte ledSalonHSV[ledSalonLEDS][3];  // Para guardar todos los valores HSV
@@ -57,10 +56,12 @@ const unsigned int colorRGB565[3][16]=  // Colores de referencia para Nextion
    {64853,    65013,    65205,     65365,    65525,     55285,    45045,     45050,     45055,     44735,     44383,     50527,     64863,     58907,      65049,     64853}   // SAT 85
 };
 
+HardwareSerial rs485Serial(1);
 
 void setup() {
   Serial.begin(9600);
-  rs485Serial.begin(57600);      //  Nextion falla mucho con los bauds más altos
+  rs485Serial.begin(57600, SERIAL_8N1, 16, 17);
+//  rs485Serial.begin(57600);      //  Nextion falla mucho con los bauds más altos
   Serial.println("INIT");
   delay( 3000 );                     ////   ATENTO AL BLANCO con el 0xFF5090
   FastLED.addLeds<WS2812B, ledSalonPin, GRB>(ledSalon, ledSalonLEDS)
@@ -542,17 +543,17 @@ void writeValueHSV() {
   }
 }
 
-void writeModeHSV(byte _H, byte _V, byte _S) {
+void writeModeHSV(byte H, byte V, byte S) {
   dinamicMode = 0;
   if(from <= to)
   {
     for(byte i=from; i<=to; i+=ledSalonXcada )
-    { ledSalonHSV[i][0] = _H, ledSalonHSV[i][1] = _V, ledSalonHSV[i][2] = _S; }
+    { ledSalonHSV[i][0] = H, ledSalonHSV[i][1] = V, ledSalonHSV[i][2] = S; }
   }else{
     for(byte i=flancos[0][0]; i<=to; i+=ledSalonXcada )
-    { ledSalonHSV[i][0] = _H, ledSalonHSV[i][1] = _V, ledSalonHSV[i][2] = _S; }
+    { ledSalonHSV[i][0] = H, ledSalonHSV[i][1] = V, ledSalonHSV[i][2] = S; }
     for(byte i=from; i<=flancos[1][1]; i+=ledSalonXcada )
-    { ledSalonHSV[i][0] = _H, ledSalonHSV[i][1] = _V, ledSalonHSV[i][2] = _S; }
+    { ledSalonHSV[i][0] = H, ledSalonHSV[i][1] = V, ledSalonHSV[i][2] = S; }
   }
 }
 
