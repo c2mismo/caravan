@@ -3,7 +3,6 @@
 
 // #include "arduino.h"
 #include <SoftwareSerial.h>
-//SoftwareSerial rs485Serial(16, 14); // RX, TX
 SoftwareSerial rs485Serial(16, 14); // RX, TX
 byte nextionPing;
 byte state=1;
@@ -11,7 +10,7 @@ byte state=1;
 char cmd;
 char page;
 bool avanced;
-byte pinVcc = 22;
+byte pinVcc = 22;  // Preconf
 byte nameObject = 0;
 char object;
 byte mode;
