@@ -274,36 +274,35 @@ Serial.print("fanSalonName = "); Serial.println(fanSalonName);
 Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
               switch(fanSalonMode)
               {
-                case 0: // OFF
+                case 0: // Request OFF
                   if(fanPin==fanSalonPin)
                   {
                     if(fanName==fanSalonName)
                     {
-                      fanSalonValueRaw=1;
                       digitalWrite(fanSalonPin, HIGH); // Low trigger  OFF
+                      fanSalonValueRaw=1;
                       rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
                       rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
                       NextionSYNQ(1);
                     }
                   }
                 break;
-                case 1: // ON
+                case 1: // Request ON
   Serial.println("ON");
                   if(fanPin==fanSalonPin)
                   {
                     if(fanName==fanSalonName)
                     {
                       fanSalonValueRaw=1;
-                      digitalWrite(fanSalonPin, LOW); // Low trigger   ON
                       escSalon.writeMicroseconds(fanSalonActiv);  // Init esc
-                      delay(1);
+                      delay(500);
+                      digitalWrite(fanSalonPin, LOW); // Low trigger   ON
+                      delay(1000);
                       escSalon.writeMicroseconds(fanSalonStarter);
                       delay(fanSalonStarterDelay);   // Para hacer un "delay por millis" todo lo siguiente
                                                     // debe estar fuera de el proceso de lectura
-                      
                       escSalon.writeMicroseconds(fanSalonMin);
-                      rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
-                      rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
+                      //rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
                       NextionSYNQ(1);
                     }
                   }
