@@ -38,7 +38,7 @@ byte pinVcc;
 byte nameObject;
 
 //  Limitar a Relés en uso
-const byte relesPin  [32] {  5,   4,   3,   2,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49};
+const byte relesPin  [32] {  2,   3,   4,   5,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49};
 //                        {101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216};
 uint8_t relePin;
 
@@ -279,13 +279,8 @@ Serial.print("cmd = "); Serial.println(cmd);
                   {
                     if(fanName==fanSalonName)
                     {
-<<<<<<< HEAD
-                      digitalWrite(fanSalonPin, HIGH); // Low trigger  OFF
-                      fanSalonValueRaw=1;
-=======
                       fanSalonValueRaw=1;//fanSalonPin
                       digitalWrite(48, HIGH); // Low trigger  OFF
->>>>>>> 0cdc1f87cdf556c51f47cf6c4cf7fd067697b254
                       rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=1"); FF();
                       rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=0"); FF();
                       NextionSYNQ(1);
@@ -300,16 +295,9 @@ Serial.print("cmd = "); Serial.println(cmd);
                     {
                       fanSalonValueRaw=1;
                       escSalon.writeMicroseconds(fanSalonActiv);  // Init esc
-<<<<<<< HEAD
-                      delay(500);
-                      digitalWrite(fanSalonPin, LOW); // Low trigger   ON
-                      delay(1000);
-                      escSalon.writeMicroseconds(fanSalonStarter);
-=======
                       digitalWrite(48, LOW); // Low trigger   ON
                       delay(1);
                       escSalon.writeMicroseconds(1500);//fanSalonStarter
->>>>>>> 0cdc1f87cdf556c51f47cf6c4cf7fd067697b254
                       delay(fanSalonStarterDelay);   // Para hacer un "delay por millis" todo lo siguiente
                                                     // debe estar fuera de el proceso de lectura
                       escSalon.writeMicroseconds(fanSalonMin);
