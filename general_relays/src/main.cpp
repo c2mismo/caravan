@@ -38,7 +38,7 @@ byte pinVcc;
 byte nameObject;
 
 //  Limitar a Relés en uso
-const byte relesPin  [32] {  5,   4,   3,   2,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49};
+const byte relesPin  [32] {  2,   3,   4,   5,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49};
 //                        {101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216};
 uint8_t relePin;
 
@@ -274,7 +274,7 @@ Serial.print("cmd = "); Serial.println(cmd);
 //Serial.print("fanSalonMode = "); Serial.println(fanSalonMode);
               switch(fanSalonMode)
               {
-                case 0: // OFF
+                case 0: // Request OFF
                   if(fanPin==fanSalonPin)
                   {
                     if(fanName==fanSalonName)
@@ -287,7 +287,7 @@ Serial.print("cmd = "); Serial.println(cmd);
                     }
                   }
                 break;
-                case 1: // ON
+                case 1: // Request ON
   Serial.println("ON");
                   if(fanPin==fanSalonPin)
                   {
@@ -300,10 +300,8 @@ Serial.print("cmd = "); Serial.println(cmd);
                       escSalon.writeMicroseconds(1500);//fanSalonStarter
                       delay(fanSalonStarterDelay);   // Para hacer un "delay por millis" todo lo siguiente
                                                     // debe estar fuera de el proceso de lectura
-                      
                       escSalon.writeMicroseconds(fanSalonMin);
-                      rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
-                      rs485Serial.print("pageMain.jPin" + String(fanSalonPin) + ".val=" + String(fanSalonValueRaw)); FF();
+                      //rs485Serial.print("pageMain.tPin" + String(fanSalonPin) + ".picc=2"); FF();
                       NextionSYNQ(1);
                     }
                   }
