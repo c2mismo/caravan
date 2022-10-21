@@ -12,7 +12,7 @@ CRGB ledSalon[ledSalonLEDS];  // Con el constructor creamos el array RGB
 int ledSalonXcada = 1;
 int from = 0;
 int to = ledSalonLEDS;
-byte brightness = 200;
+byte brightness = 255;
 
 bool dinamicMode = 0;
 
@@ -45,7 +45,11 @@ void setup() {
   FastLED.show();
   }
 
-  ShowFastLed( 137, 156, 200);
+//  ShowFastLed( 137, 156, 200);  // Color
+
+  ShowFastLed4( 137, 156, 50);  // Color
+
+//  ShowFastLed( 64, 0, 75);  // White
 }
 
 
@@ -85,9 +89,20 @@ void ShowFastLed3(byte _H, byte _V, byte S) {
   }
 }
 
+void ShowFastLed4(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>127)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
 
 void ShowPacifico() {
-  EVERY_N_MILLISECONDS( 20) {
+  EVERY_N_MILLISECONDS( 10) {
     pacifica_loop();
     FastLED.show();
   }
