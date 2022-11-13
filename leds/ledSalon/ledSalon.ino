@@ -47,9 +47,9 @@ void setup() {
 
 //  ShowFastLed( 137, 156, 200);  // Color
 
-  ShowFastLed4( 137, 156, 50);  // Color
+//  ShowFastLed4( 137, 156, 50);  // Color
 
-//  ShowFastLed( 64, 0, 75);  // White
+  ShowFastLed( 64, 0, 75);  // White
 }
 
 
