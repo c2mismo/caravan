@@ -23,7 +23,7 @@ byte numLed;
 #include <SPI.h> //
 #include <FastLED.h>
 const byte ledSalonPin = 21;
-const byte ledSalonLEDS = 130;
+const byte ledSalonLEDS = 131;
 CRGB ledSalon[ledSalonLEDS];  // Con el constructor creamos el array RGB
 byte ledSalonHSV[ledSalonLEDS][3];  // Para guardar todos los valores HSV
 byte ledSalonXcada = 1;
@@ -36,15 +36,15 @@ bool dinamicMode = 0;
 bool dinamicModeType = 0;
 
 const byte flancos[9][2]={
-  {   0,  16 }, // Flanco 1 (Flanco 1 1ª mitad)
-  { 123, 129 }, // Flanco 1 (Flanco 1 2ª mitad)
-  {  17,  24 }, // Flanco 2
-  {  25,  48 }, // Flanco 3
-  {  49,  57 }, // Flanco 4
-  {  58,  81 }, // Flanco 5
-  {  82,  90 }, // Flanco 6
-  {  91, 114 }, // Flanco 7
-  { 115, 122 }  // Flanco 8
+  {   0,  17 }, // Flanco 1 (Flanco 1 1ª mitad)
+  { 124, 130 }, // Flanco 1 (Flanco 1 2ª mitad)
+  {  18,  25 }, // Flanco 2
+  {  26,  49 }, // Flanco 3
+  {  50,  58 }, // Flanco 4
+  {  59,  82 }, // Flanco 5
+  {  83,  91 }, // Flanco 6
+  {  92, 115 }, // Flanco 7
+  { 116, 123 }  // Flanco 8
 };
 
 const unsigned int colorRGB565[3][16]=  // Colores de referencia para Nextion
@@ -63,8 +63,8 @@ void setup() {
   rs485Serial.begin(57600, SERIAL_8N1, 16, 17);
 //  rs485Serial.begin(57600);      //  Nextion falla mucho con los bauds más altos
   Serial.println("INIT");
-  delay( 3000 );                     ////   ATENTO AL BLANCO con el 0xFF5090
-  FastLED.addLeds<WS2812B, ledSalonPin, GRB>(ledSalon, ledSalonLEDS)
+  delay( 3000 );                     ////   ATENTO AL BLANCO con el 0xFF5090  // for IP65 GRB  and for IP67 RGB
+  FastLED.addLeds<WS2812B, ledSalonPin, RGB>(ledSalon, ledSalonLEDS)
   .setCorrection(  UncorrectedColor ); 
 //  .setCorrection(  0xFF5090 );            //  UncorrectedColor, TypicalSMD5050, Typical8mmPixel El resto es identico )
 //  FastLED.setBrightness( brightness );          // Con CHSV( 24, 255, 255);  "amarillo"

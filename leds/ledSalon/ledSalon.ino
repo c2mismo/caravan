@@ -1,17 +1,18 @@
 //#define _DEBUG_
 
 // #include "arduino.h"
-HardwareSerial rs485Serial(1); // Use UART channel 1 TX 10 RX 9
+//HardwareSerial rs485Serial(1); // Use UART channel 1 TX 10 RX 9
 
 #include <FastLED.h>
-const byte ledSalonPin = 21;
-const byte ledSalonLEDS = 398;
+const byte ledSalonPin = 5;
+const int ledSalonLEDS = 398;
+
 CRGB ledSalon[ledSalonLEDS];  // Con el constructor creamos el array RGB
-byte ledSalonHSV[ledSalonLEDS][3];  // Para guardar todos los valores HSV
-byte ledSalonXcada = 1;
-byte from = 1;
-byte to = ledSalonLEDS;
-byte brightness = 200;
+// byte ledSalonHSV[ledSalonLEDS][3];  // Para guardar todos los valores HSV *** Falta memoria
+int ledSalonXcada = 1;
+int from = 0;
+int to = ledSalonLEDS;
+byte brightness = 255;
 
 bool dinamicMode = 0;
 
@@ -25,12 +26,12 @@ const int flancos[5][2]={
 
 void setup() {
   Serial.begin(9600);
-  rs485Serial.begin(57600, SERIAL_8N1, 9, 10);
+//  rs485Serial.begin(57600, SERIAL_8N1, 9, 10);
 //  rs485Serial.begin(57600);      //  Nextion falla mucho con los bauds más altos
   Serial.println("INIT");
   delay( 3000 );                     ////   ATENTO AL BLANCO con el 0xFF5090  // for IP65 GRB  and for IP67 RGB
-  FastLED.addLeds<WS2812B, ledSalonPin, GRB>(ledSalon, ledSalonLEDS);
-  //.setCorrection(  UncorrectedColor );
+  FastLED.addLeds<WS2812B, ledSalonPin, GRB>(ledSalon, ledSalonLEDS)
+  .setCorrection(  UncorrectedColor ); 
 //  .setCorrection(  0xFF5090 );            //  UncorrectedColor, TypicalSMD5050, Typical8mmPixel El resto es identico )
   FastLED.setBrightness( brightness );          // Con CHSV( 24, 255, 255);  "amarillo"
 //  synqReleOnOff();                               //  Amarillo,     mas rojo  ,      mas amarillo  
@@ -38,45 +39,70 @@ void setup() {
                                                   //  verdoso   , mas amarillo, mas verdoso
                                                   // Con CHSV( 64, 255, 255);  "verdoso" parece el spectrum
                                                   //
-                                                  
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    ledSalon[i] = CHSV( 0, 0, 0);
+  FastLED.show();
+  }
+
+//  ShowFastLed( 137, 156, 200);  // Color
+
+//  ShowFastLed4( 137, 156, 50);  // Color
+
+  ShowFastLed( 64, 0, 75);  // White
 }
+
 
 void loop() {
 //  ShowPacifico();
 
-  writeModeHSV( 64, 156, 254);
-
-  ShowFastLed();
-
 }
 
 
-                         // No me entra _S por la cara
-void writeModeHSV(byte _H, byte _V, byte S) {
-  dinamicMode = 0;
-  if(from <= to)
+void ShowFastLed(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
   {
-    for(byte i=from; i<=to; i+=ledSalonXcada )
-    { ledSalonHSV[i][0] = _H, ledSalonHSV[i][1] = _V, ledSalonHSV[i][2] = S; }
-  }else{
-    for(byte i=flancos[0][0]; i<=to; i+=ledSalonXcada )
-    { ledSalonHSV[i][0] = _H, ledSalonHSV[i][1] = _V, ledSalonHSV[i][2] = S; }
-    for(byte i=from; i<=flancos[1][1]; i+=ledSalonXcada )
-    { ledSalonHSV[i][0] = _H, ledSalonHSV[i][1] = _V, ledSalonHSV[i][2] = S; }
-  }
-}
-
-void ShowFastLed() {
-  for (byte i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
-  {
-    ledSalon[i] = CHSV( ledSalonHSV[i][0], ledSalonHSV[i][1], ledSalonHSV[i][2]);
-  }
+    ledSalon[i] = CHSV( _H, _V, S);
   FastLED.show();
+  }
+}
+
+void ShowFastLed2(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i<40 || i>345)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed3(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>39 && i<346)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed4(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>127)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
 }
 
 
 void ShowPacifico() {
-  EVERY_N_MILLISECONDS( 20) {
+  EVERY_N_MILLISECONDS( 10) {
     pacifica_loop();
     FastLED.show();
   }

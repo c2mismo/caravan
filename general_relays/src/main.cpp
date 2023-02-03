@@ -82,7 +82,7 @@ void NextionSYNQ(byte a) {
 // RELAY's
   switch(a)
   {
-  // synq PageMain
+  // synq PageMainCOM3
     case 0:
 Serial.print("NextionSYNQ = "); Serial.println(a);
       for (byte i=0;i<32;i++)
