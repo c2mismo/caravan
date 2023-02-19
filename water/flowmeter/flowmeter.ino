@@ -19,12 +19,12 @@ const byte caudalimetroGnd = 6;
 const byte caudalimetroGndArmoured = 2;
 const byte caudalimetroVcc = 11;
 
-const byte caudalTMRmax = 1000;
+const int caudalTMRmax = 1000;
 unsigned long caudalTMRlast;
 volatile byte caudalISRcounter = 0;
 
 void setup() {
-  waterSerial.begin(57600);
+  waterSerial.begin(115200);
 
   pinMode(caudalimetroGnd, OUTPUT), digitalWrite(caudalimetroGnd, LOW);
   pinMode(caudalimetroGndArmoured, OUTPUT), digitalWrite(caudalimetroGndArmoured, LOW);
