@@ -38,7 +38,7 @@ char page;
 bool waterDetectFull = 0;
 bool waterDetectFullLast = 0;
 
-float waterMaxVolume = 100;
+float waterMaxVolume = 120;
 float waterPartialVolume = 0;
 float waterStock = waterMaxVolume;
 
@@ -303,6 +303,11 @@ void sendNextion_synq() {
       rs485Serial.print("pageMain.jWater.val=" + String(sendWaterStockPorcent)); FF();
       rs485Serial.print("pageMain.xWpart.val=" + String(sendWaterPartialVolume)); FF();
       rs485Serial.print("click EndSynqWater,1"); FF();
+    break;
+    case '~': // Page Main
+      FF();
+      rs485Serial.print("pageBlack.vaSynqWater.val=1"); FF();
+      rs485Serial.print("page pIsSYNQ"); FF();
     break;
     case 'W': // Page Water
       FF();
