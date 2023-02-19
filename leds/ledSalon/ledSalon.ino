@@ -49,12 +49,12 @@ void setup() {
 
 //  ShowFastLed4( 137, 156, 50);  // Color
 
-  ShowFastLed( 64, 0, 75);  // White
+//  ShowFastLed( 64, 0, 200);  // White
 }
 
 
 void loop() {
-//  ShowPacifico();
+  ShowPacifico();
 
 }
 
