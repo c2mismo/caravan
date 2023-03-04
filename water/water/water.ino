@@ -2,18 +2,25 @@
  * Arduino Pro Mini
  * Sensor flowmeter YF-B1
  * Sensor water full XKC-Y25-NPN
- * 
- * Detectado mucho ruido,
+ *
+ * Detectado mucho ruido en el YF-B1,
  * realizado debounce por harware
  * Condensador cerámico de Señal a GND de 10 nF
- * 
+ * Tipicamente el factor es de 7.5 (calib1)
+ * Probé en vez de mode RISING en mode CHANGE
+ * que ya el factor sería el doble
+ *
+ * deberia haber conprobado con el osciloscopio
+ * pero parece que esta claro que el arduino
+ * pierde lecturas cuanto mayor es la revolución.
+ *
  * FALLING 50 pulso/s
  * CHANGE 110 pulso/s
  * mucho mejor parece que puede leer con menos caudal inclusive
  */
 
 
-// #define _DEBUG_
+#define _DEBUG_
 #define _TMR_
 
 const byte flowmeterRX = 2;
