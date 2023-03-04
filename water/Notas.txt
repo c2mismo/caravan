@@ -1,0 +1,36 @@
+
+
+Comunicación
+
+Page Main
+#3WQM
+Cambiar para configurar en el boton general de configuraciones
+Al pulsar en la barra actualizar igual #3WQM
+
+Page Water
+1º #3WQW
+solo una vez si es correcto
+
+2º #3WR1
+Activamos el Request Dates
+Para que el MCU envie datos mientras esté preparado para ello
+
+3º al salir de la página
+#3WR0
+Desactivamos el envio de datos en el MCU
+
+
+He intentado manejar el control y lectura con dos arduino uno dedicado a la captación y conteo de las RPMs
+y otro para hacer los cálculos y estar atento a la comunicación
+
+pero no ha dado resultados óptimos, el problema es que pierdo conteo y
+que necesito que esté enviando los datos continuamente y el arduino no puede estar leyendo
+en dos puertos UARTs a la vez.
+
+Quizás con más tiempo podría haber encontrado alguna solucion al respecto, pero me parece inutil seguir
+resistiendome o evitando el ESP32
+
+Por lo tanto empezaremos en los ratos libres ha ir migrando y testando el equipo con esta MCU.
+
+Primer paso migrar el flowmeter, depués el cáculo de datos y por último la comunicación con el Nextion.
+
