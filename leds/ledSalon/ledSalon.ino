@@ -1,3 +1,6 @@
+// Arduino NANO ATmega328P - 5V/16MHz (OLD Bootloader)
+
+
 //#define _DEBUG_
 
 // #include "arduino.h"
@@ -5,7 +8,7 @@
 
 #include <FastLED.h>
 const byte ledSalonPin = 5;
-const int ledSalonLEDS = 398;
+const int ledSalonLEDS = 399;   // 398
 
 CRGB ledSalon[ledSalonLEDS];  // Con el constructor creamos el array RGB
 // byte ledSalonHSV[ledSalonLEDS][3];  // Para guardar todos los valores HSV *** Falta memoria
@@ -15,6 +18,7 @@ int to = ledSalonLEDS;
 byte brightness = 255;
 
 bool dinamicMode = 0;
+
 
 const int flancos[5][2]={
   {   0,  39 }, // Flanco 1
@@ -30,7 +34,7 @@ void setup() {
 //  rs485Serial.begin(57600);      //  Nextion falla mucho con los bauds más altos
   Serial.println("INIT");
   delay( 3000 );                     ////   ATENTO AL BLANCO con el 0xFF5090  // for IP65 GRB  and for IP67 RGB
-  FastLED.addLeds<WS2812B, ledSalonPin, GRB>(ledSalon, ledSalonLEDS)
+  FastLED.addLeds<WS2812B, ledSalonPin, RGB>(ledSalon, ledSalonLEDS)
   .setCorrection(  UncorrectedColor ); 
 //  .setCorrection(  0xFF5090 );            //  UncorrectedColor, TypicalSMD5050, Typical8mmPixel El resto es identico )
   FastLED.setBrightness( brightness );          // Con CHSV( 24, 255, 255);  "amarillo"
@@ -39,17 +43,26 @@ void setup() {
                                                   //  verdoso   , mas amarillo, mas verdoso
                                                   // Con CHSV( 64, 255, 255);  "verdoso" parece el spectrum
                                                   //
+  delay(500);
   for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
   {
     ledSalon[i] = CHSV( 0, 0, 0);
   FastLED.show();
   }
-
+  delay(500);
 //  ShowFastLed( 137, 156, 200);  // Color
+
+//  ShowFastLed( 0, 255, 200);  // Rojo -> verde
+
+//  ShowFastLed( 95, 255, 200);  // Verde -> Rojo
+
+//  ShowFastLed( 159, 255, 200);  // azul igual
 
 //  ShowFastLed4( 137, 156, 50);  // Color
 
-//  ShowFastLed( 64, 0, 200);  // White
+//  ShowFastLed( 64, 0, 255);  // White
+
+//  ShowFastLed( 255, 0, 0);  // OFF
 }
 
 
