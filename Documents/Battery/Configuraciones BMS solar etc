@@ -12,7 +12,7 @@ y con ello rectificamos parámetros
 Para configurarlo seguir los diferentes pasos en orden:
 
 1- Batt type > USER
-2- Batt AH > 300
+2- Batt AH > 320
 3- Temp Comp Coeff. > -3mV/ºC/2V
 4- Rated Voltage > 24V
 
