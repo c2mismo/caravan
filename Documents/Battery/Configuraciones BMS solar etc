@@ -45,18 +45,52 @@ para prolongar la vida útil de la batería:
 
 BMS Config
 
-Voltage máximo por celda 3.75V -> 3.60V
-Tensión máxima total 30.00V -> 28.80V
-Tensión mínima 17.60V -> 22.00V
+Parámetros de protección
 
+Tensión máxima por celda 3.65V
+Tensión mínima por celda 2.50V
+Tensión máxima total 29.20V
+Tensión mínima total 20.00V
+Protección ante diferencia 0.80V
+Protección contra sobrecorriente de carga 125.0A
+Protección contra sobrecorriente de descarga 50.0A
 
+Características de la celda
 
+Tipo LFP / liFePO4
+Capacidad nominal 320.0AH
+Tensión nominal 3.20V
+Tiempo de espera para hibernación 3600S
+Configuración de SOC 80.0%
+Tensión de comienzo de balanceo 3.20V
+Balanceo ante diferencia de tensión 0.05V
 
+Configuración placa de adquisición de datos
 
-Es mejor sacrificar aproximadamente un 5% de la carga, pero alargaremos la vida útil de la batería.
+Número de placas 1
+Número de grupos en placa 1 8
+Número de grupos en placa 2 0
+Número de grupos en placa 3 0
+Número de sensores de temperatura en placa 1 1
+Número de sensores de temperatura en placa 2 0
+Número de sensores de temperatura en placa 3 0
 
+Protección de la temperatura
 
-Fnt: https://ycomosehace.es/smart-bms/
+Protección ante alta temperatura en carga 65ºC
+Protección ante baja temperatura en carga 0ºC
+Protección ante alta temperatura en descarga 70ºC
+Protección ante baja temperatura en descarga -20ºC
+Protección ante diferencia de temperatura 15ºC
+Protección ante temperatura MOS 47ºC
+
+Ajuste sistema
+
+Tipo de protocolo NONE
+Camino de la comunicación RS485
+
+Recordad:
+Calibrar corriente (de vez en cuando).
 
 
 *************************************************
