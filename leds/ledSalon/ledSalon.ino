@@ -19,7 +19,7 @@ byte brightness = 255;
 
 bool dinamicMode = 0;
 
-
+/*
 const int flancos[5][2]={
   {   0,  39 }, // Flanco 1
   {  40,  126 }, // Flanco 2
@@ -27,7 +27,7 @@ const int flancos[5][2]={
   {  258,  345 }, // Flanco 4
   {  346,  398 }, // Flanco 5
 };
-
+*/
 void setup() {
   Serial.begin(9600);
 //  rs485Serial.begin(57600, SERIAL_8N1, 9, 10);
@@ -43,7 +43,7 @@ void setup() {
                                                   //  verdoso   , mas amarillo, mas verdoso
                                                   // Con CHSV( 64, 255, 255);  "verdoso" parece el spectrum
                                                   //
-  delay(500);
+  delay(1000);
   for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
   {
     ledSalon[i] = CHSV( 0, 0, 0);
@@ -112,6 +112,9 @@ void ShowFastLed4(byte _H, byte _V, byte S) {
   FastLED.show();
   }
 }
+
+
+
 
 
 void ShowPacifico() {
