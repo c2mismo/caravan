@@ -8,7 +8,7 @@
 
 #include <FastLED.h>
 const byte ledSalonPin = 5;
-const int ledSalonLEDS = 399;   // 398
+const int ledSalonLEDS = 399;   // 398 Empieza a contar desde "0" el primer led
 
 CRGB ledSalon[ledSalonLEDS];  // Con el constructor creamos el array RGB
 // byte ledSalonHSV[ledSalonLEDS][3];  // Para guardar todos los valores HSV *** Falta memoria
@@ -50,6 +50,21 @@ void setup() {
   FastLED.show();
   }
   delay(500);
+/*
+ * ShowFastLed  = Completa
+ * ShowFastLed0 = Mesita
+ * ShowFastLed1 = Cocina
+ * ShowFastLed2 = Mesita + Cocina
+ * ShowFastLed3 = Salón
+ * ShowFastLed4 = Salón Izquierda
+ * ShowFastLed5 = Salón Trasero
+ * ShowFastLed6 = Salón Derecha
+ * ShowFastLed7 = Ventana Izquierda
+ * ShowFastLed8 = Ventana Trasero
+ * ShowFastLed9 = Ventana Derecha
+ * 
+ */
+
 //  ShowFastLed( 137, 156, 200);  // Color
 
 //  ShowFastLed( 0, 255, 200);  // Rojo -> verde
@@ -58,16 +73,51 @@ void setup() {
 
 //  ShowFastLed( 159, 255, 200);  // azul igual
 
-//  ShowFastLed4( 137, 156, 50);  // Color
+//  ShowFastLed( 137, 156, 50);  // Celeste
+
+//  ShowFastLed( 0, 174, 255);  // Rosa
+
+//  ShowFastLed( 0, 174, 50);  // Rosa
 
 //  ShowFastLed( 64, 0, 255);  // White
 
 //  ShowFastLed( 255, 0, 0);  // OFF
+
+
+///////////////////////////////////////////
+
+// Con mucha luz
+
+  ShowFastLed( 137, 156, 50);  // Celeste
+
+  ShowFastLed7( 0, 174, 255);  // Rosa
+
+  ShowFastLed8( 0, 174, 255);  // Rosa
+
+  ShowFastLed9( 0, 174, 255);  // Rosa
+
+///////////////////////////////////////////
+
+
+/*//////////////////////////////////////////
+
+// Con poca luz
+
+  ShowFastLed( 137, 156, 25);  // Celeste
+
+  ShowFastLed7( 0, 174, 50);  // Rosa
+
+  ShowFastLed8( 0, 174, 50);  // Rosa
+
+  ShowFastLed9( 0, 174, 50);  // Rosa
+
+//////////////////////////////////////////*/
+
 }
 
 
 void loop() {
-  ShowPacifico();
+//  ShowPacifico();
 
 }
 
@@ -76,6 +126,28 @@ void ShowFastLed(byte _H, byte _V, byte S) {
   for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
   {
     ledSalon[i] = CHSV( _H, _V, S);
+  FastLED.show();
+  }
+}
+
+void ShowFastLed0(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i<40)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed1(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>345)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
   FastLED.show();
   }
 }
@@ -105,7 +177,62 @@ void ShowFastLed3(byte _H, byte _V, byte S) {
 void ShowFastLed4(byte _H, byte _V, byte S) {
   for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
   {
-    if (i>127)
+    if (i>39 && i<126)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed5(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>125 && i<257)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed6(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>256 && i<346)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed7(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>51 && i<119)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed8(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>146 && i<236)
+    {
+      ledSalon[i] = CHSV( _H, _V, S);
+    }
+  FastLED.show();
+  }
+}
+
+void ShowFastLed9(byte _H, byte _V, byte S) {
+  for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
+  {
+    if (i>263 && i<332)  // (i>256 && i<346)
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
