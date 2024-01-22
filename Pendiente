@@ -1,0 +1,45 @@
+
+
+Tipos de esquemas
+Electrónicos
+Conecciones
+Distrubución
+
+
+controladores lógicos programables (PLC)
+
+MCU Unidad de microcontrolador aunque los PLCs tienen microcontroladores
+al MCU se le diferencia del PLC que este lo tiene todo integrado en el IC
+Los MCU suelen venir integrada en una placa de desarrollo
+
+PIC es una MCU sin placa de desarrollo
+
+
+COMUNICACION
+Usamos RS485 y no MODbus ni CANbus por el NEXTION
+
+
+
+Poner filtros EMI a los leds (tengo inductores de 3A)
+
+Cambiar luz cocina por Luz Salón 18 W/metro
+
+Enchufe mechero salón
+
+Comprar
+
+mangera cable 3x0.75
+
+10 RS485
+10 Splits RJ45
+
+jumpers machos
+
+faston peques fundas silicona
+
+JX2.54-2
+
+
+
+
+
