@@ -31,8 +31,8 @@ const byte waterWhiteDetectPin = 7;    // Yellow
 const byte waterWhiteDetectModePin = 9;// Grey
 const byte waterWhiteDetectVCC = 6;    // Brown
 const byte waterWhiteDetectGND = 8;    // Blue
-const byte rs485_RX = 11;
-const byte rs485_TX = 10;
+const byte rs485_RX = 12;
+const byte rs485_TX = 11;
 
 #include <SoftwareSerial.h>
 SoftwareSerial flowmeterSerial(flowmeterRX, flowmeterTX); // (Only used RX)
@@ -41,14 +41,13 @@ SoftwareSerial rs485Serial(rs485_RX, rs485_TX);
 char cmd;
 char page;
 
-bool requestNextion = 0;
 
 bool waterDetectFull = 0;
 bool waterDetectFullLast = 0;
 
 float waterMaxVolume = 120;
 float waterPartialVolume = 0;
-float waterStock = 0;
+float waterStock = waterMaxVolume;
 
 bool calcCaudalAvailable = false;
 #ifdef _TMR_
@@ -74,27 +73,15 @@ float calib8 = 20;      // >=36     Calib caudalISRcounter=37
 const int caudalTMRmax = 1000;
 unsigned long caudalTMRlast;
 
-byte calibValueINT;
-byte calibValueDEC;
-byte calibNumber;
-byte waterMaxVolumeINT;
-byte waterMaxVolumeDEC;
-
-
 void setup() {
   #ifdef _DEBUG_
     while (!Serial);
     Serial.begin(9600);
   #endif
-  rs485Serial.begin(57600);
-  flowmeterSerial.begin(115200);
+  flowmeterSerial.begin(57600);
   
   #ifdef _DEBUG_
     Serial.println("INIT");
-  #endif
-
-  #ifdef _DEBUG_
-    waterStock = waterMaxVolume / 2;
   #endif
 
   pinMode(flowmeterGND, OUTPUT), digitalWrite(flowmeterGND, LOW);
@@ -110,7 +97,7 @@ void setup() {
 void loop() {
   detectWaterFull();
 
-  if (!Serial){ flowMeterSerialRead(); }
+  flowMeterSerialRead();
 
   if( calcCaudalAvailable ){ calcCaudal(); }
 
@@ -253,15 +240,12 @@ void rs485SerialRead() {
       if(minLength==true && rs485Serial.available()==checkData)
       {
         char dir = rs485Serial.read();
-          #ifdef _DEBUG_
-            Serial.print("dir= "), Serial.println(dir);
-          #endif
         if(dir == 'W')                        // Direction for WATER
         {
-          cmd = rs485Serial.read();
           #ifdef _DEBUG_
             Serial.print("cmd= "), Serial.println(cmd);
           #endif
+          cmd = rs485Serial.read();
           switch(cmd)
           {
             case 'P': // Partial count litres meter
@@ -269,9 +253,9 @@ void rs485SerialRead() {
               rs485Serial.print("pageMain.xWpart.val=" + String(waterPartialVolume)); FF();
             break;
             case 'C': // Changes calib
-              calibNumber = rs485Serial.read();
-              calibValueINT = rs485Serial.read();
-              calibValueDEC = rs485Serial.read();
+              byte calibNumber = rs485Serial.read();
+              byte calibValueINT = rs485Serial.read();
+              byte calibValueDEC = rs485Serial.read();
               if(calibNumber==1){ calib1 = calibValueINT + ( calibValueDEC / 100 ); }
               if(calibNumber==2){ calib2 = calibValueINT + ( calibValueDEC / 100 ); }
               if(calibNumber==3){ calib3 = calibValueINT + ( calibValueDEC / 100 ); }
@@ -285,18 +269,12 @@ void rs485SerialRead() {
               waterStock = waterMaxVolume;
             break;
             case 'D': // Changes deposit capacity
-              waterMaxVolumeINT = rs485Serial.read();
-              waterMaxVolumeDEC = rs485Serial.read();
+              byte waterMaxVolumeINT = rs485Serial.read();
+              byte waterMaxVolumeDEC = rs485Serial.read();
               waterMaxVolume = waterMaxVolumeINT + ( waterMaxVolumeDEC / 100 );
-            break;
-            case 'R': // Changes deposit capacity
-              requestNextion = rs485Serial.read();
             break;
             case 'Q': // SYNQ
               page = rs485Serial.read();
-          #ifdef _DEBUG_
-            Serial.print("page= "), Serial.println(page);
-          #endif
               sendNextion_synq();
             break;
           }
@@ -304,24 +282,6 @@ void rs485SerialRead() {
       }
     }
   }
-}
-
-void recuest() {
-  int sendWaterStock;
-  int senWaterMaxVolume;
-  int sendL_min;
-          #ifdef _DEBUG_
-            Serial.println("INIT recuest");
-          #endif
-      FF();
-      sendWaterStock = waterStock * 100;
-      sendL_min = l_min * 100;
-      rs485Serial.print("xWstock.val=" + String(sendWaterStock)); FF();
-      rs485Serial.print("n0.val=" + String(caudalISRcounter)); FF();
-      rs485Serial.print("x16.val=" + String(sendL_min)); FF();
-          #ifdef _DEBUG_
-            Serial.println("END recuest");
-          #endif
 }
 
 void sendNextion_synq() {
@@ -356,11 +316,7 @@ void sendNextion_synq() {
       rs485Serial.print("pageBlack.vaSynqWater.val=1"); FF();
       rs485Serial.print("page pIsSYNQ"); FF();
     break;
-    case 'W': //
-    
-          #ifdef _DEBUG_
-            Serial.println("INIT pageW");
-          #endif
+    case 'W': // Page Water
       FF();
       sendWaterStock = waterStock * 100;
       senWaterMaxVolume = waterMaxVolume * 100;
@@ -386,10 +342,15 @@ void sendNextion_synq() {
       rs485Serial.print("x13.val=" + String(sendCalib7)); FF();
       rs485Serial.print("x15.val=" + String(sendCalib8)); FF();
       rs485Serial.print("click EndSynqWater,1"); FF();
-    
-          #ifdef _DEBUG_
-            Serial.println("END pageW");
-          #endif
+    break;
+    case 'C': // Page Water counter
+      FF();
+      sendWaterStock = waterStock * 100;
+      sendL_min = l_min * 100;
+      rs485Serial.print("xWstock.val=" + String(sendWaterStock)); FF();
+      rs485Serial.print("n0.val=" + String(caudalISRcounter)); FF();
+      rs485Serial.print("x16.val=" + String(sendL_min)); FF();
+      rs485Serial.print("click EndSynqWater,1"); FF();
     break;
   }
 }
