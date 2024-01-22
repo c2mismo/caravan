@@ -89,8 +89,8 @@ Parámetros de protección
 
 Tensión máxima por celda 3.65V
 Tensión mínima por celda 2.50V
-Tensión máxima total 29.20V
-Tensión mínima total 20.00V
+Tensión máxima total 29.20V		(mas correcto es 28.40V (3.55V) pero mi cargador 230V sube hasta 29.20V (3.65V))
+Tensión mínima total 20.00V		(20.00V (2.5V) mas correcto es 22.40V (2.80V))
 Protección ante diferencia 0.80V
 Protección contra sobrecorriente de carga 125.0A
 Protección contra sobrecorriente de descarga 50.0A
@@ -102,8 +102,8 @@ Capacidad nominal 320.0AH
 Tensión nominal 3.20V
 Tiempo de espera para hibernación 3600S
 Configuración de SOC 80.0%
-Tensión de comienzo de balanceo 3.20V
-Balanceo ante diferencia de tensión 0.05V
+Tensión de comienzo de balanceo 3.20V	(mas correcto es 3.45V)
+Balanceo ante diferencia de tensión 0.05V	(mas correcto es 0.02V)
 
 Configuración placa de adquisición de datos
 
