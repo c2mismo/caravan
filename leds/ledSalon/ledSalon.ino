@@ -96,6 +96,8 @@ void setup() {
 
   ShowFastLed9( 0, 174, 255);  // Rosa
 
+  ShowFastLed1( 64, 0, 255);  // White
+
 ///////////////////////////////////////////
 
 
