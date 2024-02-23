@@ -103,7 +103,7 @@ void setup() {
 
 ///////////////////////////////////////////
 
-// Con poca luz
+// Con poca luz con ventanas
 
   ShowFastLed( 137, 156, 25);  // Celeste
 
