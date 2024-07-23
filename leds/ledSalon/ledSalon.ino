@@ -84,7 +84,7 @@ void setup() {
 //  ShowFastLed( 255, 0, 0);  // OFF
 
 
-///////////////////////////////////////////
+/*//////////////////////////////////////////
 
 // Con mucha luz
 
@@ -96,28 +96,30 @@ void setup() {
 
   ShowFastLed9( 0, 174, 255);  // Rosa
 
-///////////////////////////////////////////
-
-
-/*//////////////////////////////////////////
-
-// Con poca luz
-
-  ShowFastLed( 137, 156, 25);  // Celeste
-
-  ShowFastLed7( 0, 174, 50);  // Rosa
-
-  ShowFastLed8( 0, 174, 50);  // Rosa
-
-  ShowFastLed9( 0, 174, 50);  // Rosa
+//  ShowFastLed1( 64, 0, 255);  // White
 
 //////////////////////////////////////////*/
+
+
+///////////////////////////////////////////
+
+// Con poca luz con ventanas
+
+//  ShowFastLed( 137, 156, 25);  // Celeste
+
+//  ShowFastLed7( 0, 174, 50);  // Rosa
+
+//  ShowFastLed8( 0, 174, 50);  // Rosa
+
+//  ShowFastLed9( 0, 174, 50);  // Rosa
+
+///////////////////////////////////////////
 
 }
 
 
 void loop() {
-//  ShowPacifico();
+  ShowPacifico();
 
 }
 

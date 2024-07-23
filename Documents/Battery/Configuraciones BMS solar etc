@@ -1,4 +1,44 @@
 
+Ventiladores tacens
+
+LiFePo4
+
+Operating Temperature:
+Charge      0ºC ~ 55ºC (15ºC ~ 35ºC Optimal)
+Discharge -10ºC ~ 55ºC (15ºC ~ 35ºC Optimal)
+
+                                 Desconexión  Reactivación  Retraso (s)
+Temperatura máxima al cargar     55ºC         45ºC          2
+Temperatura mínima al cargar      0ºC          1ºC          2
+Temperatura máxima al descargar  55ºC         45ºC          2
+Temperatura mínima al descargar -10ºC         -5ºC          2
+
+
+Tabla VOLTAJES celdas LiFepo4 (% SOC <-> V)
+
+  | % SOC | V. CELDA | V. 4 CELDAS | V. 8 CELDAS |
+  | 100.0%|   3.650  |    14.60    |    29.20    |
+  |  99.5%|   3.463  |    13.85    |    27.71    |
+  |  99.0%|   3.406  |    13.62    |    27.25    |
+  |       Límites máximos aconsejados            |
+  |  95.0%|   3.380  |    13.52    |    27.04    |
+  |  90.0%|   3.353  |    13.41    |    26.82    |
+  |  80.0%|   3.321  |    13.28    |    26.56    |
+  |  70.0%|   3.303  |    13.21    |    26.42    |
+  |  60.0%|   3.286  |    13.15    |    26.29    |
+  |  50.0%|   3.276  |    13.10    |    26.21    |
+  |  40.0%|   3.265  |    13.06    |    26.12    |
+  |  30.0%|   3.242  |    12.97    |    25.94    |
+  |  20.0%|   3.219  |    12.88    |    25.75    |
+  |  15.0%|   3.150  |    12.60    |    25.20    |
+  |       Límites mínimos aconsejados            |
+  |  10.0%|   3.049  |    12.20    |    24.39    |
+  |   5.0%|   2.851  |    11.40    |    22.80    |
+  |   0.0%|   2.500  |    10.00    |    20.00    |
+
+Fnt.: https://www.tierrasinsolitas.com/bms-balanceadores-baterias-lifepo4/
+
+
 
 SOLAR
 

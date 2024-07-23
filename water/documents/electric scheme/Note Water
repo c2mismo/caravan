@@ -1,0 +1,16 @@
+
+Para cuantificar los litros usaremos un caudalimetro YF-B1
+
+Al tener los MCUs resistencias internas de pullup y pulldown muy altas
+y tener un capacitador acoplado a la resistencia, que forman un filtro RC
+ralentiza la lectura y para señales rápidas como esta pueder ser un problema
+para evitar posible conflicto realizamos un pulldown externo
+
+Y también a tener encuenta trabaja a 5V como mínimo, la señal la emite a colector abierto
+con una resistencia aproximada de 10K8 usando una resistencia de pulldown de 16K8
+nos mantemesmos en unos márgenes seguros por debajo de 3.3V,
+podemos usar perfectamente los pines 34, 35, 36 y 39.
+
+
+
+

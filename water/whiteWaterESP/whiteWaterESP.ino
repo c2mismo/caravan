@@ -8,40 +8,55 @@
  * en OUT através de una resistencia de 10K de 3.3V
  * Al encontrarno en un vehículo en movimiento no se sensará el llenado
  * hasta que el deposito no se haye bajo un límete por determinar
+ * 
+ * 
+ * Para ajustar la sensibilidad quitar tapa y sobresale un tornillo de un potenciometro
+ * girar en sentido del relog para quitar sensibilidad o
+ * girar en sentido contrario del relog para aumentar sensibilidad
  *
  * Para cuantificar los litros usaremos un caudalimetro YF-B1
  *
- * Detectado mucho ruido en el caudalimetro,
- * hemos realizado un debounce por harware
- * condensador cerámico de Señal a GND de 10 nF
+ * Al tener los MCUs resistencias internas de pullup y pulldown muy altas
+ * y tener un capacitador acoplado a la resistencia, que forman un filtro RC
+ * ralentiza la lectura y para señales rápidas como esta pueder ser un problema
+ * para evitar posible conflicto realizamos un pulldown externo
  *
- * Lacomunicación UART  con otros dipositivos se realiza
- * en RS-485 a 5V se usará un Logic Level Converter de 5V a 3.3V
+ * Lacomunicación UART  con otros dipositivos se realiza en RS-485
+ * 
+ * Hz    F = 11* Q – 3
+ * L/Min Q = 1 / 11 * F + 3 / 11
+ *
  */
 
 
 #include <WiFi.h>
 
 #define _DEBUG_
+//#define _DEBUG_WaterFull_
 
 #ifdef _DEBUG_
   #define LED_BUILTIN 2  // Tiene la logica inversa (HIGH apagado)
 #endif
 
-#define flowmeterSigISRpin 13
-#define waterFullDetectSig 14    // Yellow
-#define waterFullDetect3_3V 12   // Black
-//#define waterFullDetectMode    // Black
-        // waterFullDetectVCC;   // Brown
-        // waterFullDetectGND;   // Blue
+// RESEREVED pins 25 - 26 - 27 - 32 - 33
 
-//const byte rs485_RX = 16;
-//const byte rs485_TX = 17;
+#define flowmeterSigISRpin 4
 
-bool waterDetectFull = 0;
-//bool waterDetectFullLast = 0;
+#define whiteWaterIsFull 23
+#define greyWaterIsFull 22
+#define greyWaterIsEmpty 21
 
-bool readyFullDetect = 1;
+#define leakWaterBoiler 19
+#define leakWaterManometer 18
+#define leakWaterTank 5
+
+//#define rs485_RX = 16;
+//#define rs485_TX = 17;
+
+bool whiteWaterDetectFull = 0;
+//bool whiteWaterDetectFullLast = 0;
+
+bool readyWhiteFullDetect = 1;
 
 unsigned int waterMaxVolume = 120000;   // miliLitros
 //unsigned int waterStock = waterMaxVolume;
@@ -98,7 +113,7 @@ void flowmeterCountTask1(void * pvParameters)
     Serial.print("Tarea1 se corre en el nucleo: ");
     Serial.println(xPortGetCoreID());  // imprime el numero del procesador que estamos
   #endif
-  pinMode(flowmeterSigISRpin, INPUT_PULLUP);
+  pinMode(flowmeterSigISRpin, INPUT_PULLUP); // PULLDOWN hardware
   attachInterrupt(digitalPinToInterrupt(flowmeterSigISRpin), flowmeterCounter, RISING);
   while(1)
   {
@@ -122,12 +137,10 @@ void setup() {
   WiFi.mode(WIFI_OFF);
   btStop();                     /* Nucleo especifico en nucleo 1 es el que usa por defecto */
 
-  pinMode(waterFullDetectSig, INPUT_PULLUP);
-  pinMode(waterFullDetect3_3V, OUTPUT);
+  pinMode(whiteWaterIsFull, INPUT_PULLUP);
 
   #ifdef _DEBUG_
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(waterFullDetect3_3V, HIGH);
   #endif
 
   xTaskCreatePinnedToCore(
@@ -165,11 +178,11 @@ void loop() {
   #endif
   }
 
-  #ifdef _DEBUG_
-    waterDetectFull = digitalRead(waterFullDetectSig);
+  #ifdef _DEBUG_WaterFull_
+    whiteWaterDetectFull = digitalRead(whiteWaterIsFull);
 
-    //Serial.println(initFlowmeterCounter);
-    digitalWrite(LED_BUILTIN, !waterDetectFull);  // LED_BUILTIN HIGH is LOW, LOW is HIGH
+    Serial.println(whiteWaterDetectFull);
+    digitalWrite(LED_BUILTIN, !whiteWaterDetectFull);  // LED_BUILTIN HIGH is LOW, LOW is HIGH
   #endif
 }
 
@@ -185,6 +198,7 @@ void pulsesSecFlowmeter() {
 }
 
 // Para calibrar reseteamos el ESP32 y llenamos un deposito de 5 litros
+
 void calibFlowmeter() {
   timeFlowmeterCounter = (millis() - initTimeFlowmeterCounter) / 1000;
   l_hour = ((timeFlowmeterCounter) * counterFlowmeter) * 60 / factorCalib1;
@@ -213,16 +227,14 @@ void calcFlowmeter() {
 
 
 void waterDetectIsFull(){
-  if(!readyFullDetect && waterStock < waterMaxVolume/2){
-    digitalWrite(waterFullDetect3_3V, HIGH);
-    readyFullDetect = true;
+  if(!readyWhiteFullDetect && waterStock < waterMaxVolume/3*2){
+    readyWhiteFullDetect = true;
   }
-  if(readyFullDetect){
-    waterDetectFull = digitalRead(waterDetectFull);
-    if(waterDetectFull){
+  if(readyWhiteFullDetect){
+    whiteWaterDetectFull = digitalRead(whiteWaterDetectFull);
+    if(whiteWaterDetectFull){
       waterStock = waterMaxVolume;
-      digitalWrite(waterFullDetect3_3V, LOW);
-      readyFullDetect = false;
+      readyWhiteFullDetect = false;
     }
   }
 }

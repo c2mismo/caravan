@@ -9,3 +9,13 @@ Se probó usar una media movil exponencial
 como a la señal pero con un valor de 0.1
 y desvirtuaba mucho, figarse en maxVal y minVal.
 
+**********************************************************
+
+Cambiar la alimentación del RS485 de RAW a 9V
+
+**********************************************************
+
+Desmontar el diferencial y comprobarlo fuera de la caja
+con el grupo electrógeno y con el inversor
+
+

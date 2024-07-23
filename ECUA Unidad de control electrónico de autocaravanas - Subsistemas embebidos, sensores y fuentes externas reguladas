@@ -1,0 +1,64 @@
+
+ECUA Unidad de control electrónico de autocaravanas - Subsistemas embebidos, sensores y fuentes externas reguladas
+
+NAME NEXTION
+Descripción - Pantala táctil
+Fuente externa rergulada añadida -  output 5V 1,8A - 3A pico
+HMI - Nextion Intelligent Serie P: NX8048P070-011C-Y
+
+NAME - CTRLofPowerLines (RELES)
+Descripción - Centralita electrónica para el control de líneas eléctricas
+MCU - Arduino Mega
+
+NAME -AC_Control
+Descripción - Centralita electrónica
+Fuente externa rergulada añadida -
+MCU - Arduino DM MEGA2560 Strong
+Sensores:
+Notas:
+
+NAME - LEDS
+Descripción - Centralita electrónica
+Fuente externa rergulada añadida -
+MCU - Pro Micro ATmega32U4 5V 16MHz (Leonardo)
+Sensores:
+Notas:
+
+NAME - WATERS
+Descripción - Centralita electrónica para el control de las aguas blancas y grises
+Fuente externa rergulada añadida -
+MCU - ESP32-wroom-32D
+Sensores:
+Notas:
+
+NAME - KITCHEN
+Descripción - Centralita electrónica para el control de la nevera
+Fuente externa rergulada añadida -
+MCU -
+Sensores:
+Notas:
+
+
+************************************************
+Previsto
+
+NAME - DC_Control
+Descripción - Centralita electrónica para el control de la nevera
+Fuente externa rergulada añadida -
+MCU - ESP32-wroom-32
+Sensores:
+Notas:
+
+
+
+
+
+
+NAME -
+Descripción - Centralita electrónica
+Fuente externa rergulada añadida -
+PLC -
+Sensores:
+Notas:
+
+
