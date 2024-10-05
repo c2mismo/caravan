@@ -105,13 +105,13 @@ void setup() {
 
 // Con poca luz con ventanas
 
-//  ShowFastLed( 137, 156, 25);  // Celeste
+  ShowFastLed( 137, 156, 25);  // Celeste
 
-//  ShowFastLed7( 0, 174, 50);  // Rosa
+  ShowFastLed7( 0, 174, 50);  // Rosa
 
-//  ShowFastLed8( 0, 174, 50);  // Rosa
+  ShowFastLed8( 0, 174, 50);  // Rosa
 
-//  ShowFastLed9( 0, 174, 50);  // Rosa
+  ShowFastLed9( 0, 174, 50);  // Rosa
 
 ///////////////////////////////////////////
 
@@ -119,7 +119,7 @@ void setup() {
 
 
 void loop() {
-  ShowPacifico();
+//  ShowPacifico();
 
 }
 
