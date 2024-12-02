@@ -17,7 +17,7 @@ int from = 0;
 int to = ledSalonLEDS;
 byte brightness = 255;
 
-bool dinamicMode = 0;
+// bool dinamicMode = 0;
 
 /*
 const int flancos[5][2]={
@@ -43,12 +43,12 @@ void setup() {
                                                   //  verdoso   , mas amarillo, mas verdoso
                                                   // Con CHSV( 64, 255, 255);  "verdoso" parece el spectrum
                                                   //
-  delay(1000);
+  delay(1000);  // Revisar
   for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
   {
-    ledSalon[i] = CHSV( 0, 0, 0);
-  FastLED.show();
+    ledSalon[i] = CRGB::Black; // apagado
   }
+  FastLED.show();
   delay(500);
 /*
  * ShowFastLed  = Completa
@@ -65,13 +65,15 @@ void setup() {
  * 
  */
 
-//  ShowFastLed( 137, 156, 200);  // Color
-
 //  ShowFastLed( 0, 255, 200);  // Rojo -> verde
 
 //  ShowFastLed( 95, 255, 200);  // Verde -> Rojo
 
+//  ShowFastLed( 85, 255, 200);  // Verde ??
+
 //  ShowFastLed( 159, 255, 200);  // azul igual
+
+//  ShowFastLed( 192, 255, 200);  // se supone que aqua pero se ve moraillo
 
 //  ShowFastLed( 137, 156, 50);  // Celeste
 
@@ -81,7 +83,7 @@ void setup() {
 
 //  ShowFastLed( 64, 0, 255);  // White
 
-//  ShowFastLed( 255, 0, 0);  // OFF
+//  ShowFastLed( 255, 0, 0);  // CRGB::Black;
 
 
 /*//////////////////////////////////////////
@@ -128,8 +130,8 @@ void ShowFastLed(byte _H, byte _V, byte S) {
   for (int i = 0; i < ledSalonLEDS; i+=ledSalonXcada)
   {
     ledSalon[i] = CHSV( _H, _V, S);
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed0(byte _H, byte _V, byte S) {
@@ -139,8 +141,8 @@ void ShowFastLed0(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed1(byte _H, byte _V, byte S) {
@@ -150,8 +152,8 @@ void ShowFastLed1(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed2(byte _H, byte _V, byte S) {
@@ -161,8 +163,8 @@ void ShowFastLed2(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed3(byte _H, byte _V, byte S) {
@@ -172,8 +174,8 @@ void ShowFastLed3(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed4(byte _H, byte _V, byte S) {
@@ -183,8 +185,8 @@ void ShowFastLed4(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed5(byte _H, byte _V, byte S) {
@@ -194,8 +196,8 @@ void ShowFastLed5(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed6(byte _H, byte _V, byte S) {
@@ -205,8 +207,8 @@ void ShowFastLed6(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed7(byte _H, byte _V, byte S) {
@@ -216,8 +218,8 @@ void ShowFastLed7(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed8(byte _H, byte _V, byte S) {
@@ -227,8 +229,8 @@ void ShowFastLed8(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 void ShowFastLed9(byte _H, byte _V, byte S) {
@@ -238,8 +240,8 @@ void ShowFastLed9(byte _H, byte _V, byte S) {
     {
       ledSalon[i] = CHSV( _H, _V, S);
     }
-  FastLED.show();
   }
+  FastLED.show();
 }
 
 
@@ -249,6 +251,9 @@ void ShowFastLed9(byte _H, byte _V, byte S) {
 void ShowPacifico() {
   EVERY_N_MILLISECONDS( 10) {
     pacifica_loop();
+//    pacifica_one_layer();
+//    pacifica_add_whitecaps();
+//    pacifica_deepen_colors();
     FastLED.show();
   }
 }
