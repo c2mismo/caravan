@@ -101,7 +101,7 @@ Tipo LFP / liFePO4
 Capacidad nominal 320.0AH
 Tensión nominal 3.20V
 Tiempo de espera para hibernación 3600S
-Configuración de SOC 80.0%
+Configuración de SOC 100.0% (configurar cuando esté cargada)
 Tensión de comienzo de balanceo 3.20V	(mas correcto es 3.45V)
 Balanceo ante diferencia de tensión 0.05V	(mas correcto es 0.02V)
 
@@ -131,6 +131,18 @@ Camino de la comunicación RS485
 
 Recordad:
 Calibrar corriente (de vez en cuando).
+
+Nota:
+El SOC lo mide por corriente,
+me indica que está al 0% cuando se supone que no le quedan Ah alguno, ejm.
+me ha marcado 0% estando la batería a 26.6 V esto para la batería corresponde,
+a una carga del 80%.
+No obstante no corta la corriente hasta alcanzar el voltage indicado para ello.
+
+El mínimo lo configuro a 20 V, porque de lo contrario,
+si la bateria no está muy cargada, se puede producir un corte por caida de tensión
+al demandar una carga exesiva en un momento dado, no obstante me aconsejo,
+cargar la bateria cuando la bateria alcance los 26 V.
 
 
 *************************************************
