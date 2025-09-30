@@ -16,57 +16,46 @@
 # build/  ignorar todos los archivos que se llamen build
 # doc/**/*.pdf    todos los pdf en doc y recursivo
 
-.*
+# Excepciones PRIMERO
 !.git
 !.gitignore
+!.kilocodemodes
+
+# Todos los archivos que comienzan con "."
+.*/
+.??*
+# Cualquiera que termine en
+*~
 
 # OTHERS
 *.lnk
 Thumbs*
 *encryptable
 tmp
-*Editor_dxgi.log
+TMP
+temp
+TEMP
+tmp*
+TMP*
+temp*
+TEMP*
+*tmp
+*TMP
+*temp
+*TEMP
 
-
-# vscode & platformIO
-.vscode
-.pio
-test
-dependencies
-
-
-# Fnt. https://github.com/github/gitignore/blob/master/Global/Linux.gitignore
-
-*~
-
-# temporary files which can be created if a process still has a handle open of a deleted file
-.fuse_hidden*
-
-# KDE directory preferences
-.directory
-
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
-# .nfs files are created when an open file is removed but is still being accessed
-.nfs*
-
-
-# Fnt. https://github.com/github/gitignore/blob/master/Global/GPG.gitignore
-
-secring.*
-
-
-# Fnt. https://github.com/github/gitignore/blob/master/Global/Backup.gitignore
-
+# Backups
 *.bak
 *.gho
 *.ori
 *.orig
 *.tmp
 
-
 # Fnt. https://github.com/github/gitignore/blob/master/Global/Diff.gitignore
-
 *.patch
 *.diff
+
+# GPG o ssh
+secring.*
+ssh*
+*ssh
