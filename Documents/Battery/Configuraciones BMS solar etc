@@ -4,7 +4,7 @@ Ventiladores tacens
 LiFePo4
 
 Operating Temperature:
-Charge      0ºC ~ 55ºC (15ºC ~ 35ºC Optimal)
+Charge      0ºC ~ 45ºC (15ºC ~ 35ºC Optimal)
 Discharge -10ºC ~ 55ºC (15ºC ~ 35ºC Optimal)
 
                                  Desconexión  Reactivación  Retraso (s)
@@ -40,7 +40,10 @@ Fnt.: https://www.tierrasinsolitas.com/bms-balanceadores-baterias-lifepo4/
 
 
 
-SOLAR
+*************************************************
+*************************************************
+
+MPPT Config
 
 Se podría configurar si no queda más remedio como GEL
 
@@ -80,6 +83,7 @@ para prolongar la vida útil de la batería:
 
 18- Low Volt. Rec. > 26.4
 
+
 *************************************************
 *************************************************
 
@@ -89,11 +93,11 @@ Parámetros de protección
 
 Tensión máxima por celda 3.65V
 Tensión mínima por celda 2.50V
-Tensión máxima total 29.20V		(mas correcto es 28.40V (3.55V) pero mi cargador 230V sube hasta 29.20V (3.65V))
-Tensión mínima total 20.00V		(20.00V (2.5V) mas correcto es 22.40V (2.80V))
+Tensión máxima total 29.20V		*Ver nota 1
+Tensión mínima total 20.00V		*Ver nota 2
 Protección ante diferencia 0.80V
 Protección contra sobrecorriente de carga 125.0A
-Protección contra sobrecorriente de descarga 50.0A
+Protección contra sobrecorriente de descarga 95.0A
 
 Características de la celda
 
@@ -101,9 +105,9 @@ Tipo LFP / liFePO4
 Capacidad nominal 320.0AH
 Tensión nominal 3.20V
 Tiempo de espera para hibernación 3600S
-Configuración de SOC 100.0% (configurar cuando esté cargada)
-Tensión de comienzo de balanceo 3.20V	(mas correcto es 3.45V)
-Balanceo ante diferencia de tensión 0.05V	(mas correcto es 0.02V)
+Configuración de SOC 100.0%		*Ver nota 3
+Tensión de comienzo de balanceo 3.45V
+Balanceo ante diferencia de tensión 0.02V
 
 Configuración placa de adquisición de datos
 
@@ -133,16 +137,25 @@ Recordad:
 Calibrar corriente (de vez en cuando).
 
 Nota:
-El SOC lo mide por corriente,
-me indica que está al 0% cuando se supone que no le quedan Ah alguno, ejm.
-me ha marcado 0% estando la batería a 26.6 V esto para la batería corresponde,
+
+1.-Lo correcto es 28.40V (3.55V) pero mi cargador 230V sube hasta 29.20V (3.65V),
+lo tengo pendiente de configurar.
+
+2.- El mínimo lo configuro a 20 V (2.5V), porque de lo contrario,
+si la bateria no está muy cargada, se puede producir un corte por caida de tensión
+al demandar una carga exesiva en un momento dado.
+Lo correcto es 22.40V (2.80V), ver como configurar para que permita picos
+de 1 o2 seg. de 20 V (2.5V).
+No obstante me aconsejo, cargar la bateria cuando la bateria alcance los 26 V.
+
+3.- Configurar a 100% cuando esté completamente cargada.
+El SOC, parece que, lo mide por corriente, cuando me indica que está
+al 0% cuando se supone que no le quedan Ah alguno, ejm.
+Me ha marcado 0% estando la batería a 26.6 V esto para la batería corresponde,
 a una carga del 80%.
 No obstante no corta la corriente hasta alcanzar el voltage indicado para ello.
 
-El mínimo lo configuro a 20 V, porque de lo contrario,
-si la bateria no está muy cargada, se puede producir un corte por caida de tensión
-al demandar una carga exesiva en un momento dado, no obstante me aconsejo,
-cargar la bateria cuando la bateria alcance los 26 V.
+
 
 
 *************************************************
