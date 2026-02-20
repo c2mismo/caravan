@@ -63,7 +63,7 @@ Guardamos y empezamos a configurar mas específicammente,
 es preferible tener los parámetros un poco bajos
 para prolongar la vida útil de la batería:
 
-5- Boost time > 40 min.
+5- Boost time > 180 min.
 6- Equalize time > 0 min.
 
 7- Discharge limit > 21.0
@@ -72,17 +72,23 @@ para prolongar la vida útil de la batería:
 10- Under Volt. Rect. > 26.4
 
 11- Boost Rec. > 26.6
-12- Float Charge >27.0
+12- Float Charge > 28.4
 13- Boost Charge > 28.4
 
 14- Equal Charge > 28.4
 
-15- Over Volt. Rec. > 28.4
-16- Charget Limit > 28.4
-17- Over Volt. Disc. > 28.8
+15- Over Volt. Rec. > 27.4
+16- Charget Limit > 29.2
+17- Over Volt. Disc. > 29.4
 
 18- Low Volt. Rec. > 26.4
 
+
+
+Notas:
+12- Float Charge > 27.0, cambio a 28.4 La flotación me la hace "si llega", solo un ratito, la bateria es muy grande
+Boost Charge = Float Charge = Equal Charge, es LiFePo4 y por tiempos de luz y su tamaño no necesitamos etapas.
+Tener en cuenta: Charget Limit
 
 *************************************************
 *************************************************

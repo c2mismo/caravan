@@ -96,16 +96,22 @@ void setup() {
 
   ShowFastLed8( 0, 174, 255);  // Rosa
 
-  ShowFastLed9( 0, 174, 255);  // Rosa
+  ShowFastLed9( 0, 174, 255);  // Rosa */
 
-//  ShowFastLed1( 64, 0, 255);  // White
+  ShowFastLed4( 64, 0, 255);  // White
+  ShowFastLed5( 64, 0, 255);  // White
+  ShowFastLed6( 64, 0, 255);  // White
+/*  ShowFastLed5( 64, 0, 255);  // White
+  ShowFastLed6( 64, 0, 255);  // White
+  ShowFastLed7( 64, 0, 255);  // White
+  ShowFastLed8( 64, 0, 255);  // White */
 
-//////////////////////////////////////////*/
+///////////////////////////////////////////
 
 
 ///////////////////////////////////////////
 
-// Con poca luz con ventanas
+/*/ Con poca luz con ventanas
 
   ShowFastLed( 137, 156, 25);  // Celeste
 
@@ -115,7 +121,7 @@ void setup() {
 
   ShowFastLed9( 0, 174, 50);  // Rosa
 
-///////////////////////////////////////////
+*///////////////////////////////////////////
 
 }
 
