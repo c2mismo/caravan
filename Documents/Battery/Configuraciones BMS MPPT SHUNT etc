@@ -50,7 +50,7 @@ El BMS hace una lectura un poquito inferior aL real,
 lectura en BMS 27.00V en multimetro 27.10V,
 como consejo, descartar esta diferencia.
 
-Tensión máxima por celda 3.62V
+Tensión máxima por celda 3.65V
 Tensión mínima por celda 2.50V
 Tensión máxima total 29.20V		*Ver nota 1
 Tensión mínima total 20.00V		*Ver nota 2
@@ -148,7 +148,7 @@ Para configurarlo seguir los diferentes pasos en orden:
 
 1- Batt type > USER
 2- Batt AH > 320
-3- Temp Comp Coeff. > -3mV/ºC/2V
+3- Temp Comp Coeff. > 0mV/ºC/2V
 4- Rated Voltage > 24V
 
 Guardamos y empezamos a configurar mas específicammente,
@@ -200,6 +200,33 @@ Bajar límite de carga MPPT a 27.4V (3.425V/celda) para reducir estrés térmico
 Boost Charge = Float Charge = Equal Charge, por ser una LiFePo4, por tiempos de luz y su tamaño, no necesitamos etapas.
 
 
+El Coeficiente de compensación térmica -3mV/°C/2V
+es una fórmula que el controlador usa para ajustar automáticamente el voltaje de carga según la temperatura de la batería.
 
+┌──────────────────────────────────────────┐
+│ COEFICIENTE: -3mV/°C/2V (Plomo-ácido)    │
+├──────────────────────────────────────────┤
+│ ✅ Funciona bien para:                   │
+│    • Baterías AGM/GEL/Flooded            │
+│    • Sistemas con gran variación térmica │
+│                                          │
+│ ❌ Problemático para:                    │
+│    • LiFePo4 (química estable)           │
+│    • Sistemas con BMS que protege por    │
+│      voltaje por celda                   │
+│    • Configuraciones donde quieres       │
+│      voltaje predecible                  │
+└──────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│ RECOMENDACIÓN PARA TU CASO (LiFePo4):  │
+├────────────────────────────────────────┤
+│ 🔹 Coeficiente: 0 mV/°C/2V             │
+│ 🔹 Voltaje base: 27.8V (conservador)   │
+│ 🔹 Deja que el BMS gestione los        │
+│    límites por celda                   │
+│ 🔹 Monitoriza temperaturas para        │
+│    ajustes manuales estacionales       │
+└────────────────────────────────────────┘
 
 
