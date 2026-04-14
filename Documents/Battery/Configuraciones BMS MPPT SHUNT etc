@@ -1,5 +1,4 @@
 
-Ventiladores tacens
 
 LiFePo4
 
@@ -43,61 +42,15 @@ Fnt.: https://www.tierrasinsolitas.com/bms-balanceadores-baterias-lifepo4/
 *************************************************
 *************************************************
 
-MPPT Config
-
-Se podría configurar si no queda más remedio como GEL
-
-Verificamos tensiones reale y comparamos tanto la lectura del
-voltímetro, del BMS del shunt y del solar
-y con ello rectificamos parámetros
-
-
-Para configurarlo seguir los diferentes pasos en orden:
-
-1- Batt type > USER
-2- Batt AH > 320
-3- Temp Comp Coeff. > -3mV/ºC/2V
-4- Rated Voltage > 24V
-
-Guardamos y empezamos a configurar mas específicammente,
-es preferible tener los parámetros un poco bajos
-para prolongar la vida útil de la batería:
-
-5- Boost time > 180 min.
-6- Equalize time > 0 min.
-
-7- Discharge limit > 21.0
-8- Low Volt. Disc. > 22.0
-9- Under Volt. Warn > 22.0
-10- Under Volt. Rect. > 26.4
-
-11- Boost Rec. > 26.6
-12- Float Charge > 28.4
-13- Boost Charge > 28.4
-
-14- Equal Charge > 28.4
-
-15- Over Volt. Rec. > 27.4
-16- Charget Limit > 29.2
-17- Over Volt. Disc. > 29.4
-
-18- Low Volt. Rec. > 26.4
-
-
-
-Notas:
-12- Float Charge > 27.0, cambio a 28.4 La flotación me la hace "si llega", solo un ratito, la bateria es muy grande
-Boost Charge = Float Charge = Equal Charge, es LiFePo4 y por tiempos de luz y su tamaño no necesitamos etapas.
-Tener en cuenta: Charget Limit
-
-*************************************************
-*************************************************
-
 BMS Config
 
-Parámetros de protección
+Parámetros de protección, por regla suele saltar por celda, antes que por total.
+Un dato también a tener en cuenta:
+El BMS hace una lectura un poquito inferior aL real,
+lectura en BMS 27.00V en multimetro 27.10V,
+como consejo, descartar esta diferencia.
 
-Tensión máxima por celda 3.65V
+Tensión máxima por celda 3.62V
 Tensión mínima por celda 2.50V
 Tensión máxima total 29.20V		*Ver nota 1
 Tensión mínima total 20.00V		*Ver nota 2
@@ -127,12 +80,27 @@ Número de sensores de temperatura en placa 3 0
 
 Protección de la temperatura
 
-Protección ante alta temperatura en carga 65ºC
-Protección ante baja temperatura en carga 0ºC
-Protección ante alta temperatura en descarga 70ºC
-Protección ante baja temperatura en descarga -20ºC
-Protección ante diferencia de temperatura 15ºC
-Protección ante temperatura MOS 47ºC
+┌─────────────────────────────────────┐
+│ BMS (Forzado en zonas cálidas)      │
+├─────────────────────────────────────┤
+│ Temp carga máxima:     55°C         │
+│ Temp carga mínima:     -5°C         │
+│ Temp descarga máxima:  60°C         │
+│ Temp descarga mínima: -20°C         │
+│ Diferencial celdas:    15°C         │
+│ Temp encendido vent:   47°C         │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ BMS (Configuración idónea)          │
+├─────────────────────────────────────┤
+│ Temp carga máxima:     45°C         │
+│ Temp carga mínima:      0°C         │
+│ Temp descarga máxima:  55°C         │
+│ Temp descarga mínima: -10°C         │
+│ Diferencial celdas:    15°C         │
+│ Temp encendido vent:   47°C         │
+└─────────────────────────────────────┘
 
 Ajuste sistema
 
@@ -144,8 +112,11 @@ Calibrar corriente (de vez en cuando).
 
 Nota:
 
-1.-Lo correcto es 28.40V (3.55V) pero mi cargador 230V sube hasta 29.20V (3.65V),
-lo tengo pendiente de configurar.
+1.-El BMS es la protección de bajo nivel, quiere decir que es su última
+protección. Por lo tanto se debe tener en cuenta que el resto de componentes,
+como los componentes de cargas son las que deben estar configuradas en
+unos mínimos y máximos un poco más olgados (Al rederdor del 95% de carga). En definitiva:
+Lo correcto es 29.20V (3.65V)
 
 2.- El mínimo lo configuro a 20 V (2.5V), porque de lo contrario,
 si la bateria no está muy cargada, se puede producir un corte por caida de tensión
@@ -161,29 +132,72 @@ Me ha marcado 0% estando la batería a 26.6 V esto para la batería corresponde,
 a una carga del 80%.
 No obstante no corta la corriente hasta alcanzar el voltage indicado para ello.
 
-
-
-
 *************************************************
 *************************************************
 
-SHUNT config
+MPPT Config
 
-Preset Battery AH Value > 300AH
-AH Remaining > 
-Under Voltage Protection LVP > 22V
-Over Voltag3 Protection OVP > 28.8V
-Positive Over Current Protection OCP > 200A
-Negative Over Current Protection NCP > 200A
-Over Pwer Protection OPP > 
-Over Temperature Protection OTP > 70º
-Reverting Time Protection > 5s
-Set Address > 01-01
-Set Delay Time > 15
-Monitor Function > ON
-Monitor > ON
-Relay Mode > NO
-Restore Factory Setting
+Se podría configurar si no queda más remedio como GEL
+
+Verificamos tensiones reales y comparamos tanto la lectura del
+voltímetro, del BMS del shunt y del solar
+y con ello rectificamos parámetros
+
+
+Para configurarlo seguir los diferentes pasos en orden:
+
+1- Batt type > USER
+2- Batt AH > 320
+3- Temp Comp Coeff. > -3mV/ºC/2V
+4- Rated Voltage > 24V
+
+Guardamos y empezamos a configurar mas específicammente,
+es preferible tener los parámetros un poco bajos
+para prolongar la vida útil de la batería:
+
+5- Boost time > 180 min.
+6- Equalize time > 0 min.
+
+7- Discharge limit > 21.0
+8- Low Volt. Disc. > 22.0
+9- Under Volt. Warn > 22.0
+10- Under Volt. Rect. > 25.9
+
+11- Boost Rec. > 26.1
+12- Float Charge > 27.8
+13- Boost Charge > 27.8
+
+14- Equal Charge > 27.8
+
+15- Over Volt. Rec. > 27.0
+16- Charget Limit > 27.8
+17- Over Volt. Disc. > 28.5
+
+18- Low Volt. Rec. > 25.9
+
+
+
+Notas:
+
+Tener en cuenta: Charget Limit
+Si sobrepasa el voltage al BMS le saltará la protección
+
+Para test se deben hacer en primavera/otoño con cielo medio despejado.
+Es el momento en el que le temperatura es óptima.
+El MPPT normalmente tiene un tiempo de reacción más alto que el BMS,
+al pasar una nube se recibe en la bateria unos picos tensión más altos,
+de los configurados, por unos segundos.
+Hice test con el BMS 28.20V (3.62V) y el MPPT no pude superar los 27.80V,
+una configuración más alta los picos de tensión (al paso de una nube)
+superaba los 3.62V en una de sus celdas.
+
+Tener en cuenta que 27.71V es el 99.5%, por lo tanto
+27.8V ya es una carga demás que eficiente.
+
+Por razones de temperatura extrema 40º en exterior,
+Bajar límite de carga MPPT a 27.4V (3.425V/celda) para reducir estrés térmico
+
+Boost Charge = Float Charge = Equal Charge, por ser una LiFePo4, por tiempos de luz y su tamaño, no necesitamos etapas.
 
 
 
